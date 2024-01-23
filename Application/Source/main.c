@@ -130,12 +130,20 @@ void readHeader() {
 	SEGGER_RTT_printf(0, "ramSize: %d\n", ramSize);
 	SEGGER_RTT_printf(0, "logoCheck: %d\n", logoCheck);
 }
+
+void dumpRom(void) {
+	SEGGER_RTT_printf(0,"dump rom...\n");
+	
+}
  
-void loop() {
+void loop(void) {
 	// get control signal from usb
 	switch(signal) {
 		case 1:
 			readHeader();
+			break;
+		case 2:
+			dumpRom();
 			break;
 		default:
 			break;
