@@ -52,7 +52,7 @@
           <OutputName>gbdumper</OutputName>
           <CreateExecutable>1</CreateExecutable>
           <CreateLib>0</CreateLib>
-          <CreateHexFile>0</CreateHexFile>
+          <CreateHexFile>1</CreateHexFile>
           <DebugInformation>1</DebugInformation>
           <BrowseInformation>1</BrowseInformation>
           <ListingPath>.\Listings\</ListingPath>
@@ -138,7 +138,7 @@
           </Flash1>
           <bUseTDR>1</bUseTDR>
           <Flash2>BIN\UL2CM3.DLL</Flash2>
-          <Flash3></Flash3>
+          <Flash3>"" ()</Flash3>
           <Flash4></Flash4>
           <pFcarmOut></pFcarmOut>
           <pFcarmGrp></pFcarmGrp>
@@ -490,11 +490,6 @@
               <FilePath>.\Libraries\APM32F10x_StdPeriphDriver\src\apm32f10x_bakpr.c</FilePath>
             </File>
             <File>
-              <FileName>apm32f10x_can.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Libraries\APM32F10x_StdPeriphDriver\src\apm32f10x_can.c</FilePath>
-            </File>
-            <File>
               <FileName>apm32f10x_crc.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\Libraries\APM32F10x_StdPeriphDriver\src\apm32f10x_crc.c</FilePath>
@@ -508,11 +503,6 @@
               <FileName>apm32f10x_dbgmcu.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\Libraries\APM32F10x_StdPeriphDriver\src\apm32f10x_dbgmcu.c</FilePath>
-            </File>
-            <File>
-              <FileName>apm32f10x_dma.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Libraries\APM32F10x_StdPeriphDriver\src\apm32f10x_dma.c</FilePath>
             </File>
             <File>
               <FileName>apm32f10x_dmc.c</FileName>
@@ -540,24 +530,9 @@
               <FilePath>.\Libraries\APM32F10x_StdPeriphDriver\src\apm32f10x_gpio.c</FilePath>
             </File>
             <File>
-              <FileName>apm32f10x_i2c.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Libraries\APM32F10x_StdPeriphDriver\src\apm32f10x_i2c.c</FilePath>
-            </File>
-            <File>
               <FileName>apm32f10x_misc.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\Libraries\APM32F10x_StdPeriphDriver\src\apm32f10x_misc.c</FilePath>
-            </File>
-            <File>
-              <FileName>apm32f10x_pmu.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Libraries\APM32F10x_StdPeriphDriver\src\apm32f10x_pmu.c</FilePath>
-            </File>
-            <File>
-              <FileName>apm32f10x_qspi.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Libraries\APM32F10x_StdPeriphDriver\src\apm32f10x_qspi.c</FilePath>
             </File>
             <File>
               <FileName>apm32f10x_rcm.c</FileName>
@@ -570,39 +545,9 @@
               <FilePath>.\Libraries\APM32F10x_StdPeriphDriver\src\apm32f10x_rtc.c</FilePath>
             </File>
             <File>
-              <FileName>apm32f10x_sci2c.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Libraries\APM32F10x_StdPeriphDriver\src\apm32f10x_sci2c.c</FilePath>
-            </File>
-            <File>
-              <FileName>apm32f10x_sdio.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Libraries\APM32F10x_StdPeriphDriver\src\apm32f10x_sdio.c</FilePath>
-            </File>
-            <File>
-              <FileName>apm32f10x_spi.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Libraries\APM32F10x_StdPeriphDriver\src\apm32f10x_spi.c</FilePath>
-            </File>
-            <File>
-              <FileName>apm32f10x_tmr.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Libraries\APM32F10x_StdPeriphDriver\src\apm32f10x_tmr.c</FilePath>
-            </File>
-            <File>
-              <FileName>apm32f10x_usart.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Libraries\APM32F10x_StdPeriphDriver\src\apm32f10x_usart.c</FilePath>
-            </File>
-            <File>
               <FileName>apm32f10x_wwdt.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\Libraries\APM32F10x_StdPeriphDriver\src\apm32f10x_wwdt.c</FilePath>
-            </File>
-            <File>
-              <FileName>apm32f10x_iwdt.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Libraries\APM32F10x_StdPeriphDriver\src\apm32f10x_iwdt.c</FilePath>
             </File>
           </Files>
         </Group>

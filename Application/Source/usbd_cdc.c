@@ -125,6 +125,7 @@ void USBD_VCP_OutEpCallback(uint8_t ep)
     }
 }
 
+
 /*!
  * @brief       IN endpoint transfer done handler(except EP0)
  *
