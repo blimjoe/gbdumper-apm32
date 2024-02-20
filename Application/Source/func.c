@@ -51,10 +51,10 @@ void config_sig_addr_gpio(void) {
   GPIO_ConfigStruct_A.speed = GPIO_SPEED_50MHz;
   GPIO_Config(GPIOA, &GPIO_ConfigStruct_A);
 	
-	// PB3
 	RCM_EnableAPB2PeriphClock(RCM_APB2_PERIPH_AFIO);
 	//GPIO_ConfigPinRemap(GPIO_REMAP_SWJ_JTAGDISABLE);
 	GPIO_ConfigPinRemap(GPIO_REMAP_SWJ_DISABLE);
+	
 	// GPIOB Group PB2/PB3/PB4/PB6/PB7
 	GPIO_ConfigStruct_B.mode = GPIO_MODE_OUT_PP;
   GPIO_ConfigStruct_B.pin = GPIO_PIN_2 | GPIO_PIN_3 | GPIO_PIN_4 | 
@@ -153,11 +153,6 @@ void set_address(uint16_t address) {
 	}
 }
 
-void read_gpio_data(){
-	for(int i = 7; i >= 0; i-- ) {
-		SEGGER_RTT_printf(0,"DQ%d: %d\n", i, GPIO_ReadInputBit(data_pin[i].gpiox, data_pin[i].pin));
-	}
-}
 
 uint8_t read_byte(uint16_t address) {
 	set_address(address);
@@ -190,7 +185,23 @@ uint8_t read_byte(uint16_t address) {
 }
 
 
-
 void write_byte(uint16_t address, uint8_t data){
+	int level;
+	
+	// set data pins output
+	config_gpio_data_out();
+	set_address(address);
+	
+	// set data to data pins
+	for(int i = 7; i >= 0; i--) {
+		level = (data >> i) & 1;
+		GPIO_WriteBitValue(data_pin[i].gpiox, data_pin[i].pin, level);
+	}
+	// wr set low to enable
+	GPIO_WriteBitValue(GPIOC, GPIO_PIN_8, 0);
+	__ASM volatile("nop");
+	GPIO_WriteBitValue(GPIOC, GPIO_PIN_8, 1);
+	
+	config_gpio_data_in();
 }
 

@@ -77,9 +77,9 @@ void readHeader() {
 	SEGGER_RTT_printf(0, "ramSize: %d\n", ramSize);
 	SEGGER_RTT_printf(0, "logoCheck: %d\n", logoCheck);
 	
-	char huanhang[1] = {10};
+	//char huanhang[1] = {10};
 	USBD_TxData(USBD_EP_1, (uint8_t*)gameTitle, sizeof((uint8_t*)gameTitle));
-	USBD_TxData(USBD_EP_1, (uint8_t*)huanhang, sizeof((uint8_t*)huanhang));
+	//USBD_TxData(USBD_EP_1, (uint8_t*)huanhang, sizeof((uint8_t*)huanhang));
 }
 
 void dumpRom(void) {
@@ -158,9 +158,12 @@ int main(void) {
 	GPIO_WriteBitValue(GPIOC, GPIO_PIN_0, 1); // set reset pin low
 	GPIO_WriteBitValue(GPIOC, GPIO_PIN_14, 1);
 	
+	// usb cdc
 	config_gpio_pb5();
 	GPIO_SetBit(GPIOB, GPIO_PIN_5);
 	CDC_Init();
+	
+	
 	
 	while(1) {loop();}
 }
