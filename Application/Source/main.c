@@ -100,6 +100,39 @@ void dumpRom(void) {
 		}	
 	}
 }
+
+void readram(void) {
+	rd_wr_mreq_reset();
+	
+	read_byte(0x0134);
+    
+  // if cartridge have RAM test
+  if (ramEndAddress > 0) {
+		if (cartridgeType <= 4) { // MBC1
+			write_byte(0x6000, 1); // Set RAM Mode
+    }
+      
+    // Initialise MBC
+    write_byte(0x0000, 0x0A);
+      
+    // Switch RAM banks
+    for (uint8_t bank = 0; bank < ramBanks; bank++) {
+      write_byte(0x4000, bank);
+        
+      // Read RAM
+      for (uint16_t ramAddress = 0xA000; ramAddress <= ramEndAddress; ramAddress += 64) {
+        uint8_t readData[64];
+        for (uint8_t i = 0; i < 64; i++) {
+          readData[i] = read_byte(ramAddress+i);
+        }
+				// usb write
+				USBD_TxData(USBD_EP_1, readData, sizeof(readData));
+      }
+    }
+    // Disable RAM
+    write_byte(0x0000, 0x00);
+  }
+}
  
 int main(void) {
 	
