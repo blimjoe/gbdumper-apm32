@@ -11,7 +11,7 @@ uint8_t nintendoLogo[] = {0xCE, 0xED, 0x66, 0x66, 0xCC, 0x0D, 0x00, 0x0B, 0x03, 
                           0xBB, 0xBB, 0x67, 0x63, 0x6E, 0x0E, 0xEC, 0xCC, 0xDD, 0xDC, 0x99, 0x9F, 0xBB, 0xB9, 0x33, 0x3E
                          };
 
-char gameTitle[17];
+char gameTitle[19];
 uint16_t cartridgeType = 0;
 uint16_t romSize = 0;
 uint16_t romBanks = 0;
@@ -19,9 +19,12 @@ uint16_t ramSize = 0;
 uint16_t ramBanks = 0;
 uint16_t ramEndAddress = 0;
 
+void Delay(void){
+    volatile uint32_t delay = 0xfffff;
+    while(delay--);
+}
 
 void readHeader() {
-	SEGGER_RTT_printf(0, "readHeader....\n");
 	rd_wr_mreq_reset();
 	
 	for(uint16_t romAddress = 0x0134; romAddress <= 0x143; romAddress++) {
@@ -30,15 +33,12 @@ void readHeader() {
 			(headerChar >= 0x41 && headerChar <= 0x5A) || // A-Z
 			(headerChar >= 0x61 && headerChar <= 0x7A)) { // a-z
 				gameTitle[(romAddress-0x0134)] = headerChar;
-				SEGGER_RTT_printf(0,"ok %d  ", headerChar);
 			}
 	}
-	gameTitle[16] = '\0';
-	for(int a=0; a<16; a++) {
-		SEGGER_RTT_printf(0,"%c",gameTitle[a]);
-	}
+	gameTitle[16] = '\r';
+	gameTitle[17] = '\n';
+	gameTitle[18] = '\0';
 
-	
 	uint8_t logoCheck = 1;
 	uint8_t x = 0;
 	for (uint16_t romAddress = 0x0104; romAddress <= 0x133; romAddress++) {
@@ -70,23 +70,14 @@ void readHeader() {
   if (cartridgeType == 6) { ramEndAddress = 0xA1FF; } // MBC2 512 bytes (nibbles)
   if (ramSize == 1) { ramEndAddress = 0xA7FF; } // 2K RAM
   if (ramSize > 1) { ramEndAddress = 0xBFFF; } // 8K RAM
-	
-	SEGGER_RTT_printf(0, "GameTitle: %s\n", gameTitle);
-	SEGGER_RTT_printf(0, "cartridgeType: %d\n", cartridgeType);
-	SEGGER_RTT_printf(0, "romSize: %d\n", romSize);
-	SEGGER_RTT_printf(0, "ramSize: %d\n", ramSize);
-	SEGGER_RTT_printf(0, "logoCheck: %d\n", logoCheck);
-	
-	//char huanhang[1] = {10};
+
 	USBD_TxData(USBD_EP_1, (uint8_t*)gameTitle, sizeof((uint8_t*)gameTitle));
-	//USBD_TxData(USBD_EP_1, (uint8_t*)huanhang, sizeof((uint8_t*)huanhang));
 }
 
 void dumpRom(void) {
-	SEGGER_RTT_printf(0,"dump rom...\n");
 	rd_wr_mreq_reset();
 	uint16_t romAddress = 0;
-			
+	
 	for(uint16_t bank = 1; bank < romBanks; bank++) {
 		if(cartridgeType >= 5) { // MBC2 and above
 			write_byte(0x2100, bank); //set ROM bank
@@ -102,55 +93,21 @@ void dumpRom(void) {
 			uint8_t readData[64];
 			for(uint8_t i = 0; i < 64; i++){
 				readData[i] = read_byte(romAddress+i);
-				// usb write
 			}
+			// usb write
+			USBD_TxData(USBD_EP_1, readData, sizeof(readData));
 			romAddress += 64;
-		}
-	}
-	
-}
- 
-void loop(void) {
-	// get control signal from usb
-	char message[20];
-	uint8_t receive;
-	static uint8_t dataBuf[256] = {0};
-	uint8_t signal = 0; // signal from linux. default. do nothing. 1(49). read game info. 2(50). dump rom.
-	
-	USBD_RxData(USBD_EP_1, dataBuf, g_usbDev.outBuf[USBD_EP_1].maxPackSize);
-	signal = dataBuf[0];
-	memset(dataBuf, 0, sizeof(dataBuf));
-	USBD_TxData(USBD_EP_1, &signal, sizeof(signal));
-	if(signal != 0){
-		SEGGER_RTT_printf(0, "signal = %d\n", (uint8_t)signal);
-	}
-	
-	
-	switch(signal) {
-		case 49:
-			readHeader();
-			//strcpy(message, "case 1");
-			//USBD_TxData(USBD_EP_1, (uint8_t*)message, sizeof((uint8_t*)message));
-			break;
-		case 50:
-			dumpRom();
-			strcpy(message, "case 2");
-			USBD_TxData(USBD_EP_1, (uint8_t*)message, sizeof((uint8_t*)message));
-			break;
-		default:
-			readHeader();
-		/*
-			strcpy(message, "Nothing\n");
-			USBD_TxData(USBD_EP_1, (uint8_t*)message, sizeof((uint8_t*)message));
-			memset(message, 0, sizeof(message));
-		*/
-			break;
+		}	
 	}
 }
  
 int main(void) {
-	SEGGER_RTT_printf(0, "start now...\n");
-	CDC_Init();
+	
+	//CDC_Init();
+	
+	config_gpio_pb5();
+	GPIO_SetBit(GPIOB, GPIO_PIN_5);
+	
 	config_sig_addr_gpio();
 	rd_wr_mreq_reset();
 	config_gpio_data_in();
@@ -163,7 +120,5 @@ int main(void) {
 	GPIO_SetBit(GPIOB, GPIO_PIN_5);
 	CDC_Init();
 	
-	
-	
-	while(1) {loop();}
+	while(1){}
 }

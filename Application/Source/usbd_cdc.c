@@ -27,6 +27,7 @@
 #include "usbd_cdc.h"
 #include "usbd_descriptor.h"
 #include "usbd_class_cdc.h"
+#include <string.h>
 
 /** @addtogroup Examples
   @{
@@ -113,15 +114,60 @@ static void USBD_VCP_SetConfigCallBack(void)
  *
  * @retval      None
  */
+
+/*
 void USBD_VCP_OutEpCallback(uint8_t ep)
 {
     uint32_t dataCnt;
+		char message[20];
 
     if (ep == USBD_EP_1)
     {
         dataCnt = g_usbDev.outBuf[USBD_EP_1].xferCnt;
 
-        USBD_TxData(USBD_EP_1, dataBuf, dataCnt);
+        //USBD_TxData(USBD_EP_1, dataBuf, dataCnt);
+			
+				if (memcmp(dataBuf, "read", 4) == 0) {
+					strcpy(message, "okread");
+				}
+				if (memcmp(dataBuf, "dump", 4) == 0) {
+					strcpy(message, "okdump");
+				}
+				
+				USBD_TxData(USBD_EP_1, (uint8_t*)message, sizeof((uint8_t*)message));
+    }
+}
+*/
+void USBD_VCP_OutEpCallback(uint8_t ep)
+{
+    uint32_t dataCnt;
+    char message[256];
+		extern void Delay();
+
+    if (ep == USBD_EP_1)
+    {
+        dataCnt = g_usbDev.outBuf[USBD_EP_1].xferCnt;
+
+        if (memcmp(dataBuf, "1", 1) == 0) {
+            //strcpy(message, "Reading GameTitle...\r\n");
+						//USBD_TxData(USBD_EP_1, (uint8_t*)message, strlen(message)+1);
+						Delay();
+						extern void readHeader();
+						readHeader();
+        }
+        else if (memcmp(dataBuf, "2", 1) == 0) {
+            //strcpy(message, "Dumping Games...\r\n");
+						//USBD_TxData(USBD_EP_1, (uint8_t*)message, strlen(message)+1);
+						Delay();
+						extern void dumpRom(void);
+						dumpRom();
+        }
+        else {
+            // Handle other cases if needed
+            strcpy(message, "unknown\r\n");
+						USBD_TxData(USBD_EP_1, (uint8_t*)message, strlen(message)+1);
+        }
+        
     }
 }
 
@@ -137,7 +183,7 @@ void USBD_VCP_InEpCallback(uint8_t ep)
 {
     if (ep == USBD_EP_1)
     {
-        USBD_RxData(USBD_EP_1, dataBuf, g_usbDev.outBuf[USBD_EP_1].maxPackSize);
+       USBD_RxData(USBD_EP_1, dataBuf, g_usbDev.outBuf[USBD_EP_1].maxPackSize);
     }
 }
 

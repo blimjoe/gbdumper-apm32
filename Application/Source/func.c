@@ -124,7 +124,7 @@ void config_gpio_vcc(void) {
 void config_gpio_pb5(void) {
 		GPIO_Config_T GPIO_ConfigStruct;
 	
-	//RCM_EnableAPB2PeriphClock((RCM_APB2_PERIPH_T)(RCM_APB2_PERIPH_GPIOC));
+	RCM_EnableAPB2PeriphClock((RCM_APB2_PERIPH_T)(RCM_APB2_PERIPH_GPIOB));
 	GPIO_ConfigStruct.mode = GPIO_MODE_OUT_PP;
   GPIO_ConfigStruct.pin = GPIO_PIN_5;
   GPIO_ConfigStruct.speed = GPIO_SPEED_50MHz;
@@ -173,11 +173,6 @@ uint8_t read_byte(uint16_t address) {
 		//SEGGER_RTT_printf(0,"data pin %d %d\n", i, level);
 		bval = bval | level << i;
 	}
-	//while(1) {}
-	
-	//while(1) {}
-	SEGGER_RTT_printf(0, "bval = %d\n", bval);
-	//while(1) {}
 	
 	rd_wr_mreq_reset();
 
@@ -203,5 +198,9 @@ void write_byte(uint16_t address, uint8_t data){
 	GPIO_WriteBitValue(GPIOC, GPIO_PIN_8, 1);
 	
 	config_gpio_data_in();
+}
+
+void EXIT0_IRQHandler(void) {
+	
 }
 
