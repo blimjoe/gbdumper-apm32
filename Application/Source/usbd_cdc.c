@@ -28,6 +28,7 @@
 #include "usbd_descriptor.h"
 #include "usbd_class_cdc.h"
 #include <string.h>
+#include <main.h>
 
 /** @addtogroup Examples
   @{
@@ -149,25 +150,29 @@ void USBD_VCP_OutEpCallback(uint8_t ep)
         dataCnt = g_usbDev.outBuf[USBD_EP_1].xferCnt;
 
         if (memcmp(dataBuf, "1", 1) == 0) {
-					Delay();
 					extern void readHeader();
 					readHeader();
         }
         else if (memcmp(dataBuf, "2", 1) == 0) {
-					Delay();
 					extern void dumpRom(void);
 					dumpRom();
         }
 				else if (memcmp(dataBuf, "3", 1) == 0) {
-					Delay();
 					extern void readram(void);
 					readram();
 				}
-        else {
-          // Handle other cases if needed
-          strcpy(message, "unknown\r\n");
+				#if 0
+				else if (memcmp(dataBuf, "4", 1) == 0) {
+					extern void Debug(void);
+					Debug();
+				}
+				#endif
+				/*
+				else {
+					strcpy(message, "unknown");
 					USBD_TxData(USBD_EP_1, (uint8_t*)message, strlen(message)+1);
-        }
+				}
+				*/
 			}
 }
 

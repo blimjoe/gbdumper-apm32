@@ -5,6 +5,8 @@
 #include "func.h"
 #include "bsp_delay.h"
 #include <string.h>
+#include <stdint.h>
+#include <stdio.h>
 
 uint8_t nintendoLogo[] = {0xCE, 0xED, 0x66, 0x66, 0xCC, 0x0D, 0x00, 0x0B, 0x03, 0x73, 0x00, 0x83, 0x00, 0x0C, 0x00, 0x0D,
                           0x00, 0x08, 0x11, 0x1F, 0x88, 0x89, 0x00, 0x0E, 0xDC, 0xCC, 0x6E, 0xE6, 0xDD, 0xDD, 0xD9, 0x99,
@@ -72,12 +74,12 @@ void readHeader() {
   if (ramSize > 1) { ramEndAddress = 0xBFFF; } // 8K RAM
 
 	USBD_TxData(USBD_EP_1, (uint8_t*)gameTitle, sizeof((uint8_t*)gameTitle));
+	memset(gameTitle, 0, sizeof(gameTitle));
 }
 
 void dumpRom(void) {
 	rd_wr_mreq_reset();
 	uint16_t romAddress = 0;
-	
 	for(uint16_t bank = 1; bank < romBanks; bank++) {
 		if(cartridgeType >= 5) { // MBC2 and above
 			write_byte(0x2100, bank); //set ROM bank
@@ -100,6 +102,81 @@ void dumpRom(void) {
 		}	
 	}
 }
+
+// debug
+#if 0
+
+void uint16_to_string(uint16_t value, char* str, uint32_t len) {
+    snprintf(str, len, "%04X", value);  // ? uint16_t ??????????
+}
+
+void uint8_to_string(uint8_t value, char* str, uint32_t len) {
+    snprintf(str, len, "%04X", value);  // ? uint16_t ??????????
+}
+
+void Debug(void) {
+	rd_wr_mreq_reset();
+	uint16_t romAddress = 0;
+	char message[256];
+	
+	for(uint16_t bank = 1; bank < romBanks; bank++) {
+		if(bank == 2){
+			while(1) {}
+		}
+		if(cartridgeType >= 5) { // MBC2 and above
+			write_byte(0x2100, bank); //set ROM bank
+			//strcpy(message,"one ");
+			//USBD_TxData(USBD_EP_1, (uint8_t*)message, strlen(message)+1);
+			//memset(message, 0, sizeof(message));
+		} else {
+			write_byte(0x6000, 0); //set ROM mode
+			//strcpy(message,"two ");
+			//USBD_TxData(USBD_EP_1, (uint8_t*)message, strlen(message)+1);
+			//memset(message, 0, sizeof(message));
+			write_byte(0x4000, bank>>5); //set bits 5 & 6 (01100000) of ROM bank
+			//strcpy(message,"three ");
+			//USBD_TxData(USBD_EP_1, (uint8_t*)message, strlen(message)+1);
+			//memset(message, 0, sizeof(message));
+			write_byte(0x2000, bank & 0x1F); // Set bits 0 & 4 (00011111) of ROM bank
+			//strcpy(message,"four ");
+			//USBD_TxData(USBD_EP_1, (uint8_t*)message, strlen(message)+1);
+			//memset(message, 0, sizeof(message));
+		} if(bank > 1) {
+			//strcpy(message,"five ");
+			//USBD_TxData(USBD_EP_1, (uint8_t*)message, strlen(message)+1);
+			//memset(message, 0, sizeof(message));
+			
+			romAddress = 0x4000;
+		}
+		
+		//uint16_to_string(cartridgeType, (char*)message, 10);
+		//USBD_TxData(USBD_EP_1, (uint8_t*)message, strlen(message)+1);
+		
+		// Read up to 7FFF per bank
+		int count = 0;
+		uint8_t count0[1];
+		count0[0]=0;
+		while (romAddress <= 0x7FFF) {
+			count++;
+			uint8_t readData[16];
+			for(uint8_t i = 0; i < 16; i++){
+				readData[i] = read_byte(romAddress+i);
+				uint8_t dataToSend[1];
+				dataToSend[0] = readData[i];
+				uint8_t newLine = 10;
+				count0[0] += 1;
+			}
+			// usb write
+			USBD_TxData(USBD_EP_1, readData, sizeof(readData));
+			memset(readData, 0, sizeof(readData));
+			romAddress += 16;
+			Delay();
+		}	
+	}
+}
+
+
+#endif
 
 void readram(void) {
 	rd_wr_mreq_reset();
@@ -145,13 +222,12 @@ int main(void) {
 	rd_wr_mreq_reset();
 	config_gpio_data_in();
 	config_gpio_reset();
-	GPIO_WriteBitValue(GPIOC, GPIO_PIN_0, 1); // set reset pin low
-	GPIO_WriteBitValue(GPIOC, GPIO_PIN_14, 1);
+	GPIO_WriteBitValue(GPIOC, GPIO_PIN_0, 0); // set reset pin low
+	//GPIO_WriteBitValue(GPIOC, GPIO_PIN_14, 1);
 	
 	// usb cdc
 	config_gpio_pb5();
 	GPIO_SetBit(GPIOB, GPIO_PIN_5);
 	CDC_Init();
-	
 	while(1){}
 }

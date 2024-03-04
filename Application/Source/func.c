@@ -1,7 +1,9 @@
 #include <main.h>
 #include "SEGGER_RTT.h"
 #include <usbd_core.h>
+#include <usbd_cdc.h>
 #include <func.h>
+#include <string.h>
 
 struct GPIOX address_pin[] = {
 	{GPIOC, GPIO_PIN_6},
@@ -32,6 +34,12 @@ struct GPIOX data_pin[] = {
 	{GPIOB, GPIO_PIN_14},
 	{GPIOB, GPIO_PIN_15}
 };
+void debug_log(char log[256]){
+	char message[256];
+	strcpy(message,log);
+	USBD_TxData(USBD_EP_1, (uint8_t*)message, strlen(message)+1);
+	memset(message, 0, sizeof(message));
+}
 
 void config_sig_addr_gpio(void) {
 	GPIO_Config_T GPIO_ConfigStruct_A;
@@ -161,18 +169,28 @@ uint8_t read_byte(uint16_t address) {
 
 	//SEGGER_RTT_printf(0,"read address 0x%X\n", address);
 	// wait 3 machin circle
+	
 	__ASM volatile("nop");
 	__ASM volatile("nop");
 	__ASM volatile("nop");
 
+	//extern void Delay(void);
+	//Delay();
+
 	//uint8_t bval = (GPIOB->IDATA >> 8) & 0xFF;
 	
+	
 	uint8_t bval = 0;
+	
 	for(int i = 7; i >= 0; i--) {
 		int level = GPIO_ReadInputBit(data_pin[i].gpiox, data_pin[i].pin);
 		//SEGGER_RTT_printf(0,"data pin %d %d\n", i, level);
 		bval = bval | level << i;
 	}
+	/*
+	uint16_t odata = GPIO_ReadOutputPort(GPIOB);
+	bval = ((odata >> 8) & 0xFF); 
+	*/
 	
 	rd_wr_mreq_reset();
 
@@ -182,18 +200,29 @@ uint8_t read_byte(uint16_t address) {
 
 void write_byte(uint16_t address, uint8_t data){
 	int level;
+	char message[256];
 	
 	// set data pins output
 	config_gpio_data_out();
 	set_address(address);
+	
+	// reset data pins
+	for(int a = 7; a >= 0; a--) {
+		GPIO_ResetBit(data_pin[a].gpiox, data_pin[a].pin);
+	}
 	
 	// set data to data pins
 	for(int i = 7; i >= 0; i--) {
 		level = (data >> i) & 1;
 		GPIO_WriteBitValue(data_pin[i].gpiox, data_pin[i].pin, level);
 	}
+	//strcpy(message, "Now");
+	//debug_log(message);
+		//while(1){}
 	// wr set low to enable
 	GPIO_WriteBitValue(GPIOC, GPIO_PIN_8, 0);
+	__ASM volatile("nop");
+	__ASM volatile("nop");
 	__ASM volatile("nop");
 	GPIO_WriteBitValue(GPIOC, GPIO_PIN_8, 1);
 	
