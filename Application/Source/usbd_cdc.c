@@ -161,18 +161,20 @@ void USBD_VCP_OutEpCallback(uint8_t ep)
 					extern void readram(void);
 					readram();
 				}
-				#if 0
+				#if 1
 				else if (memcmp(dataBuf, "4", 1) == 0) {
 					extern void Debug(void);
 					Debug();
 				}
 				#endif
-				/*
+
+				
 				else {
 					strcpy(message, "unknown");
 					USBD_TxData(USBD_EP_1, (uint8_t*)message, strlen(message)+1);
+					memset(message, 0, sizeof(message));
 				}
-				*/
+				memset(dataBuf, 0, sizeof(dataBuf));
 			}
 }
 
@@ -188,7 +190,9 @@ void USBD_VCP_InEpCallback(uint8_t ep)
 {
     if (ep == USBD_EP_1)
     {
-       USBD_RxData(USBD_EP_1, dataBuf, g_usbDev.outBuf[USBD_EP_1].maxPackSize);
+			memset(dataBuf, 0, sizeof(dataBuf));
+       //USBD_RxData(USBD_EP_1, dataBuf, g_usbDev.outBuf[USBD_EP_1].maxPackSize);
+			USBD_RxData(USBD_EP_1, dataBuf, 1);
     }
 }
 

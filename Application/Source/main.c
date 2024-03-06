@@ -13,7 +13,7 @@ uint8_t nintendoLogo[] = {0xCE, 0xED, 0x66, 0x66, 0xCC, 0x0D, 0x00, 0x0B, 0x03, 
                           0xBB, 0xBB, 0x67, 0x63, 0x6E, 0x0E, 0xEC, 0xCC, 0xDD, 0xDC, 0x99, 0x9F, 0xBB, 0xB9, 0x33, 0x3E
                          };
 
-char gameTitle[19];
+char gameTitle[16];
 uint16_t cartridgeType = 0;
 uint16_t romSize = 0;
 uint16_t romBanks = 0;
@@ -31,15 +31,19 @@ void readHeader() {
 	
 	for(uint16_t romAddress = 0x0134; romAddress <= 0x143; romAddress++) {
 		char headerChar = (char)read_byte(romAddress);
+		
+		/*
 		if ((headerChar >= 0x30 && headerChar <= 0x57) || // 0-9
 			(headerChar >= 0x41 && headerChar <= 0x5A) || // A-Z
 			(headerChar >= 0x61 && headerChar <= 0x7A)) { // a-z
 				gameTitle[(romAddress-0x0134)] = headerChar;
 			}
+		*/
+		if (headerChar >= 0x0020 && headerChar <= 0x7E) {
+			gameTitle[(romAddress-0x0134)] = headerChar;
+		}
 	}
-	gameTitle[16] = '\r';
-	gameTitle[17] = '\n';
-	gameTitle[18] = '\0';
+	gameTitle[15] = '\0';
 
 	uint8_t logoCheck = 1;
 	uint8_t x = 0;
@@ -73,7 +77,7 @@ void readHeader() {
   if (ramSize == 1) { ramEndAddress = 0xA7FF; } // 2K RAM
   if (ramSize > 1) { ramEndAddress = 0xBFFF; } // 8K RAM
 
-	USBD_TxData(USBD_EP_1, (uint8_t*)gameTitle, sizeof((uint8_t*)gameTitle));
+	USBD_TxData(USBD_EP_1, (uint8_t*)gameTitle, strlen(gameTitle));
 	memset(gameTitle, 0, sizeof(gameTitle));
 }
 
@@ -104,6 +108,35 @@ void dumpRom(void) {
 }
 
 // debug
+#if 1
+void uint16_to_string(uint16_t value, char* str, uint32_t len) {
+    snprintf(str, len, "%04X", value);  // ? uint16_t ??????????
+}
+void Debug(void) {
+		rd_wr_mreq_reset();
+	char message[256];
+	
+	for(uint16_t romAddress = 0x0134; romAddress <= 0x0143; romAddress++) {
+		char headerChar = (char)read_byte(romAddress);
+		
+		/*
+		if ((headerChar >= 0x30 && headerChar <= 0x57) || // 0-9
+			(headerChar >= 0x41 && headerChar <= 0x5A) || // A-Z
+			(headerChar >= 0x61 && headerChar <= 0x7A)) { // a-z
+				gameTitle[(romAddress-0x0134)] = headerChar;
+				USBD_TxData(USBD_EP_1, (uint8_t*)gameTitle, sizeof((uint8_t*)gameTitle));
+			}
+		*/
+		uint16_to_string(headerChar, (char*)message, 10);
+		USBD_TxData(USBD_EP_1, (uint8_t*)message, strlen(message)+1);
+		memset(message, 0, sizeof(message));
+		gameTitle[(romAddress-0x0134)] = headerChar;
+	}
+
+	gameTitle[15] = '\0';
+
+}
+#endif
 #if 0
 
 void uint16_to_string(uint16_t value, char* str, uint32_t len) {
