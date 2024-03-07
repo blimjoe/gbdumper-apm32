@@ -99,103 +99,6 @@ void dumpRom(void) {
 	}
 }
 
-// debug
-#if 0
-void uint16_to_string(uint16_t value, char* str, uint32_t len) {
-    snprintf(str, len, "%04X", value);  // ? uint16_t ??????????
-}
-void Debug(void) {
-		rd_wr_mreq_reset();
-	char message[256];
-	
-	for(uint16_t romAddress = 0x0134; romAddress <= 0x0143; romAddress++) {
-		char headerChar = (char)read_byte(romAddress);
-		
-		/*
-		if ((headerChar >= 0x30 && headerChar <= 0x57) || // 0-9
-			(headerChar >= 0x41 && headerChar <= 0x5A) || // A-Z
-			(headerChar >= 0x61 && headerChar <= 0x7A)) { // a-z
-				gameTitle[(romAddress-0x0134)] = headerChar;
-				USBD_TxData(USBD_EP_1, (uint8_t*)gameTitle, sizeof((uint8_t*)gameTitle));
-			}
-		*/
-		uint16_to_string(headerChar, (char*)message, 10);
-		USBD_TxData(USBD_EP_1, (uint8_t*)message, strlen(message)+1);
-		memset(message, 0, sizeof(message));
-		gameTitle[(romAddress-0x0134)] = headerChar;
-	}
-
-	gameTitle[15] = '\0';
-
-}
-
-
-
-void Debug1(void) {
-	rd_wr_mreq_reset();
-	uint16_t romAddress = 0;
-	char message[256];
-	
-	for(uint16_t bank = 1; bank < romBanks; bank++) {
-		if(bank == 2){
-			while(1) {}
-		}
-		if(cartridgeType >= 5) { // MBC2 and above
-			write_byte(0x2100, bank); //set ROM bank
-			//strcpy(message,"one ");
-			//USBD_TxData(USBD_EP_1, (uint8_t*)message, strlen(message)+1);
-			//memset(message, 0, sizeof(message));
-		} else {
-			write_byte(0x6000, 0); //set ROM mode
-			//strcpy(message,"two ");
-			//USBD_TxData(USBD_EP_1, (uint8_t*)message, strlen(message)+1);
-			//memset(message, 0, sizeof(message));
-			write_byte(0x4000, bank>>5); //set bits 5 & 6 (01100000) of ROM bank
-			//strcpy(message,"three ");
-			//USBD_TxData(USBD_EP_1, (uint8_t*)message, strlen(message)+1);
-			//memset(message, 0, sizeof(message));
-			write_byte(0x2000, bank & 0x1F); // Set bits 0 & 4 (00011111) of ROM bank
-			//strcpy(message,"four ");
-			//USBD_TxData(USBD_EP_1, (uint8_t*)message, strlen(message)+1);
-			//memset(message, 0, sizeof(message));
-		} if(bank > 1) {
-			//strcpy(message,"five ");
-			//USBD_TxData(USBD_EP_1, (uint8_t*)message, strlen(message)+1);
-			//memset(message, 0, sizeof(message));
-			
-			romAddress = 0x4000;
-		}
-		
-		//uint16_to_string(cartridgeType, (char*)message, 10);
-		//USBD_TxData(USBD_EP_1, (uint8_t*)message, strlen(message)+1);
-		
-		// Read up to 7FFF per bank
-		int count = 0;
-		uint8_t count0[1];
-		count0[0]=0;
-		while (romAddress <= 0x7FFF) {
-			count++;
-			uint8_t readData[16];
-			for(uint8_t i = 0; i < 16; i++){
-				readData[i] = read_byte(romAddress+i);
-				uint8_t dataToSend[1];
-				dataToSend[0] = readData[i];
-				uint8_t newLine = 10;
-				count0[0] += 1;
-			}
-			// usb write
-			USBD_TxData(USBD_EP_1, readData, sizeof(readData));
-			memset(readData, 0, sizeof(readData));
-			romAddress += 16;
-			Delay();
-		}	
-	}
-}
-
-
-#endif
-
-
 void readram(void) {
 	rd_wr_mreq_reset();
 	
@@ -230,22 +133,16 @@ void readram(void) {
 }
  
 int main(void) {
-	
-	//CDC_Init();
-	
+	// for usb init
 	config_gpio_pb5();
 	GPIO_SetBit(GPIOB, GPIO_PIN_5);
-	
+
 	config_sig_addr_gpio();
 	rd_wr_mreq_reset();
 	config_gpio_data_in();
-	config_gpio_reset();
-	GPIO_WriteBitValue(GPIOC, GPIO_PIN_0, 0); // set reset pin low
-	//GPIO_WriteBitValue(GPIOC, GPIO_PIN_14, 1);
 	
 	// usb cdc
-	config_gpio_pb5();
-	GPIO_SetBit(GPIOB, GPIO_PIN_5);
+
 	CDC_Init();
 	while(1){}
 }

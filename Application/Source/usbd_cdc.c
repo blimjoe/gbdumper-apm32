@@ -116,29 +116,6 @@ static void USBD_VCP_SetConfigCallBack(void)
  * @retval      None
  */
 
-/*
-void USBD_VCP_OutEpCallback(uint8_t ep)
-{
-    uint32_t dataCnt;
-		char message[20];
-
-    if (ep == USBD_EP_1)
-    {
-        dataCnt = g_usbDev.outBuf[USBD_EP_1].xferCnt;
-
-        //USBD_TxData(USBD_EP_1, dataBuf, dataCnt);
-			
-				if (memcmp(dataBuf, "read", 4) == 0) {
-					strcpy(message, "okread");
-				}
-				if (memcmp(dataBuf, "dump", 4) == 0) {
-					strcpy(message, "okdump");
-				}
-				
-				USBD_TxData(USBD_EP_1, (uint8_t*)message, sizeof((uint8_t*)message));
-    }
-}
-*/
 void USBD_VCP_OutEpCallback(uint8_t ep)
 {
     uint32_t dataCnt;
@@ -162,11 +139,11 @@ void USBD_VCP_OutEpCallback(uint8_t ep)
 					readram();
 				}
 				#if 0
-				else if (memcmp(dataBuf, "4", 1) == 0) {
+				else if (memcmp(dataBuf, "0", 1) == 0) {
 					extern void Debug(void);
 					Debug();
 				}
-				#endif	
+				#endif
 				else {
 					strcpy(message, "unknown");
 					USBD_TxData(USBD_EP_1, (uint8_t*)message, strlen(message)+1);

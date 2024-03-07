@@ -4,7 +4,7 @@
 void config_sig_addr_gpio(void);
 void config_gpio_data_out(void);
 void config_gpio_data_in(void);
-void config_gpio_reset(void);
+void config_gpio_gba_keys(void);
 void config_gpio_vcc(void);
 void rd_wr_mreq_reset(void);
 void config_gpio_pb5(void);
