@@ -133,10 +133,26 @@ void rd_wr_mreq_reset() {
 	GPIO_WriteBitValue(GPIOC, GPIO_PIN_10, 1); //mreq/CS high
 }
 
+void CS(int level) {
+	GPIO_WriteBitValue(GPIOC, GPIO_PIN_10, level);
+}
+
+void CS2(int level) {
+	GPIO_WriteBitValue(GPIOC, GPIO_PIN_0, level);
+}
+
+void WR(int level) {
+	GPIO_WriteBitValue(GPIOC, GPIO_PIN_8, level);
+}
+
+void RD(int level) {
+	GPIO_WriteBitValue(GPIOC, GPIO_PIN_9, level);
+}
+
 void set_sig_read() {
-	GPIO_WriteBitValue(GPIOC, GPIO_PIN_8, 1); //wr set high to disable write
-	GPIO_WriteBitValue(GPIOC, GPIO_PIN_9, 0); // rd low to enable read
-	GPIO_WriteBitValue(GPIOC, GPIO_PIN_10, 0); //mreq/CS low
+	WR(1); //wr set high to disable write
+	RD(0); // rd low to enable read
+	CS(0); //mreq/CS low
 }
 
 void set_address(uint16_t address) {
@@ -145,6 +161,9 @@ void set_address(uint16_t address) {
 		level = (address >> i) & 1;
 		GPIO_WriteBitValue(address_pin[i].gpiox, address_pin[i].pin, level);
 	}
+}
+
+void set_address_gba(unsigned long address) {
 }
 
 

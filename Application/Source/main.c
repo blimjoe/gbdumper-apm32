@@ -26,6 +26,7 @@ void Delay(void){
     while(delay--);
 }
 
+// GB/GBC
 void readHeader() {
 	rd_wr_mreq_reset();
 	
@@ -131,18 +132,32 @@ void readram(void) {
     write_byte(0x0000, 0x00);
   }
 }
+// end GB/GBC
+
+// GBA
+void readHeader_GBA(void){
+	
+}
+
+void switchMode(int mode) {
+	if(mode == 0) { // 0, GB/GBC mode
+		config_sig_addr_gpio();
+		rd_wr_mreq_reset();
+		config_gpio_data_in();
+	}
+	else if(mode == 1) { //1, GBA mode
+		config_sig_addr_gpio();
+		config_gpio_data_out(); // GB data pins is GBA addr pins
+	}
+}
  
 int main(void) {
 	// for usb init
 	config_gpio_pb5();
 	GPIO_SetBit(GPIOB, GPIO_PIN_5);
-
-	config_sig_addr_gpio();
-	rd_wr_mreq_reset();
-	config_gpio_data_in();
-	
 	// usb cdc
-
 	CDC_Init();
+	
+	switchMode(0); // default GB/GBC mode
 	while(1){}
 }
