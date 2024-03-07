@@ -15,8 +15,5 @@ void CS2(int level);
 uint8_t read_byte(uint16_t address);
 void write_byte(uint16_t address, uint8_t data);
 
-struct GPIOX {
-	GPIO_T * gpiox;
-	uint16_t pin;
-};
+
 

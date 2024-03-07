@@ -158,6 +158,10 @@ int main(void) {
 	// usb cdc
 	CDC_Init();
 	
-	switchMode(0); // default GB/GBC mode
+	//switchMode(0); // default GB/GBC mode
+	
+	switchMode(1); // set gba mode
+	
+	
 	while(1){}
 }

@@ -4,36 +4,7 @@
 #include <usbd_cdc.h>
 #include <func.h>
 #include <string.h>
-
-struct GPIOX address_pin[] = {
-	{GPIOC, GPIO_PIN_6},
-	{GPIOC, GPIO_PIN_7},
-	{GPIOB, GPIO_PIN_2},
-	{GPIOB, GPIO_PIN_3},
-	{GPIOB, GPIO_PIN_4},
-	{GPIOD, GPIO_PIN_2},
-	{GPIOB, GPIO_PIN_6},
-	{GPIOB, GPIO_PIN_7},
-	{GPIOA, GPIO_PIN_8},
-	{GPIOA, GPIO_PIN_9},
-	{GPIOA, GPIO_PIN_10},
-	{GPIOC, GPIO_PIN_11},
-	{GPIOC, GPIO_PIN_12},
-	{GPIOA, GPIO_PIN_13},
-	{GPIOA, GPIO_PIN_14},
-	{GPIOA, GPIO_PIN_15}
-};
-
-struct GPIOX data_pin[] = {
-	{GPIOB, GPIO_PIN_8},
-	{GPIOB, GPIO_PIN_9},
-	{GPIOB, GPIO_PIN_10},
-	{GPIOB, GPIO_PIN_11},
-	{GPIOB, GPIO_PIN_12},
-	{GPIOB, GPIO_PIN_13},
-	{GPIOB, GPIO_PIN_14},
-	{GPIOB, GPIO_PIN_15}
-};
+#include <pin_out.h>
 
 void debug_log(char log[256]){
 	char message[256];
@@ -164,6 +135,8 @@ void set_address(uint16_t address) {
 }
 
 void set_address_gba(unsigned long address) {
+	int level;
+	
 }
 
 
