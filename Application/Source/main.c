@@ -31,14 +31,6 @@ void readHeader() {
 	
 	for(uint16_t romAddress = 0x0134; romAddress <= 0x143; romAddress++) {
 		char headerChar = (char)read_byte(romAddress);
-		
-		/*
-		if ((headerChar >= 0x30 && headerChar <= 0x57) || // 0-9
-			(headerChar >= 0x41 && headerChar <= 0x5A) || // A-Z
-			(headerChar >= 0x61 && headerChar <= 0x7A)) { // a-z
-				gameTitle[(romAddress-0x0134)] = headerChar;
-			}
-		*/
 		if (headerChar >= 0x0020 && headerChar <= 0x7E) {
 			gameTitle[(romAddress-0x0134)] = headerChar;
 		}
@@ -108,7 +100,7 @@ void dumpRom(void) {
 }
 
 // debug
-#if 1
+#if 0
 void uint16_to_string(uint16_t value, char* str, uint32_t len) {
     snprintf(str, len, "%04X", value);  // ? uint16_t ??????????
 }
@@ -136,18 +128,10 @@ void Debug(void) {
 	gameTitle[15] = '\0';
 
 }
-#endif
-#if 0
 
-void uint16_to_string(uint16_t value, char* str, uint32_t len) {
-    snprintf(str, len, "%04X", value);  // ? uint16_t ??????????
-}
 
-void uint8_to_string(uint8_t value, char* str, uint32_t len) {
-    snprintf(str, len, "%04X", value);  // ? uint16_t ??????????
-}
 
-void Debug(void) {
+void Debug1(void) {
 	rd_wr_mreq_reset();
 	uint16_t romAddress = 0;
 	char message[256];
@@ -210,6 +194,7 @@ void Debug(void) {
 
 
 #endif
+
 
 void readram(void) {
 	rd_wr_mreq_reset();

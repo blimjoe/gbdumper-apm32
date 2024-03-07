@@ -148,7 +148,7 @@ void rd_wr_mreq_reset() {
 void set_sig_read() {
 	GPIO_WriteBitValue(GPIOC, GPIO_PIN_8, 1); //wr set high to disable write
 	GPIO_WriteBitValue(GPIOC, GPIO_PIN_9, 0); // rd low to enable read
-	GPIO_WriteBitValue(GPIOC, GPIO_PIN_10, 0); //mreq/CS low
+	GPIO_WriteBitValue(GPIOC, GPIO_PIN_10, 1); //mreq/CS low
 }
 
 void set_address(uint16_t address) {

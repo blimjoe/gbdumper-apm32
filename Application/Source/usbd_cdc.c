@@ -161,14 +161,12 @@ void USBD_VCP_OutEpCallback(uint8_t ep)
 					extern void readram(void);
 					readram();
 				}
-				#if 1
+				#if 0
 				else if (memcmp(dataBuf, "4", 1) == 0) {
 					extern void Debug(void);
 					Debug();
 				}
-				#endif
-
-				
+				#endif	
 				else {
 					strcpy(message, "unknown");
 					USBD_TxData(USBD_EP_1, (uint8_t*)message, strlen(message)+1);
