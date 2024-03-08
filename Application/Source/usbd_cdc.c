@@ -148,6 +148,10 @@ void USBD_VCP_OutEpCallback(uint8_t ep)
 					extern void readHeader_GBA();
 					readHeader_GBA();
         }
+				else if (memcmp(dataBuf, "5", 1) == 0) {
+					extern void dump_GBA(void);
+					dump_GBA();
+        }
 				else {
 					strcpy(message, "unknown");
 					USBD_TxData(USBD_EP_1, (uint8_t*)message, strlen(message)+1);

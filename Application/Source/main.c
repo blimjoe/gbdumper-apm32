@@ -191,7 +191,52 @@ void readHeader_GBA(void) {
 		
 	}
 }
-
+/*
+void dump_GBA(void) {
+	RD(1);
+	WR(1);
+	CS(0);
+	CS2(0);
+	
+	uint32_t romAddress = 0x0;
+	int count = 0;
+	for(uint32_t romAddress = 0x0; romAddress < 0x8000000; romAddress += 2) {
+		uint16_t word = read_word(romAddress);
+		uint8_t readData[64];
+		readData[count] = word & 0xFF;
+		count++;
+		readData[count] = (word >> 8) & 0xFF;
+		count++;
+		if(count == 63) {
+			USBD_TxData(USBD_EP_1, readData, sizeof(readData));
+			__ASM volatile("nop");
+			__ASM volatile("nop");
+			__ASM volatile("nop");
+			count = 0;
+		}
+		if(romAddress == 0x7ffffff && count !=0 ) {
+			USBD_TxData(USBD_EP_1, readData, sizeof(readData));
+		}
+	}
+	if(count != 0){
+	}
+}
+*/
+void dump_GBA(void) {
+	RD(1);
+	WR(1);
+	CS(0);
+	CS2(0);
+	
+	char saveTypeStr[14];
+	for (int currWord = 0; currWord < 0x8000000; currWord +=2) {
+		uint16_t word = read_word(currWord);
+		uint8_t byte1 = word & 0xFF;
+		uint8_t byte2 = (word >> 8) & 0xFF;
+		USBD_TxData(USBD_EP_1, &byte1, 1);
+		USBD_TxData(USBD_EP_1, &byte2, 1);
+	}
+}
 
 void switchMode(int mode) {
 	if(mode == 0) { // 0, GB/GBC mode
