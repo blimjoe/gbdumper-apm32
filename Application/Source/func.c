@@ -57,6 +57,46 @@ void config_sig_addr_gpio(void) {
   GPIO_Config(GPIOD, &GPIO_ConfigStruct_D);
 }
 
+void config_gba_data_gpio(void) {
+	GPIO_Config_T GPIO_ConfigStruct_A;
+	GPIO_Config_T GPIO_ConfigStruct_B;
+	GPIO_Config_T GPIO_ConfigStruct_C;
+	GPIO_Config_T GPIO_ConfigStruct_D;
+	
+	RCM_EnableAPB2PeriphClock((RCM_APB2_PERIPH_T)(RCM_APB2_PERIPH_GPIOA));
+	RCM_EnableAPB2PeriphClock((RCM_APB2_PERIPH_T)(RCM_APB2_PERIPH_GPIOB));
+	RCM_EnableAPB2PeriphClock((RCM_APB2_PERIPH_T)(RCM_APB2_PERIPH_GPIOC));
+	RCM_EnableAPB2PeriphClock((RCM_APB2_PERIPH_T)(RCM_APB2_PERIPH_GPIOD));
+	
+	// GPIOA Group PA8/PA9/PA10/PA13/PA14/PA15
+	GPIO_ConfigStruct_A.mode = GPIO_MODE_IN_PD;
+  GPIO_ConfigStruct_A.pin = GPIO_PIN_8	| GPIO_PIN_9	| GPIO_PIN_10 | 
+														GPIO_PIN_13 | GPIO_PIN_14	| GPIO_PIN_15;
+  GPIO_ConfigStruct_A.speed = GPIO_SPEED_50MHz;
+  GPIO_Config(GPIOA, &GPIO_ConfigStruct_A);
+	
+	// GPIOB Group PB2/PB3/PB4/PB6/PB7
+	GPIO_ConfigStruct_B.mode = GPIO_MODE_IN_PD;
+  GPIO_ConfigStruct_B.pin = GPIO_PIN_2 | GPIO_PIN_3 | GPIO_PIN_4 | 
+														GPIO_PIN_6 | GPIO_PIN_7;
+  GPIO_ConfigStruct_B.speed = GPIO_SPEED_50MHz;
+  GPIO_Config(GPIOB, &GPIO_ConfigStruct_B);
+	
+	// GPIOC Group PC6/PC7/PC11/PC12 
+	GPIO_ConfigStruct_C.mode = GPIO_MODE_IN_PD;
+  GPIO_ConfigStruct_C.pin = GPIO_PIN_6 | GPIO_PIN_7 | 
+														 GPIO_PIN_11 | 
+														GPIO_PIN_12 ;
+  GPIO_ConfigStruct_C.speed = GPIO_SPEED_50MHz;
+  GPIO_Config(GPIOC, &GPIO_ConfigStruct_C);
+	
+	// GPIOD Group PD2
+	GPIO_ConfigStruct_D.mode = GPIO_MODE_IN_PD;
+  GPIO_ConfigStruct_D.pin = GPIO_PIN_2;
+  GPIO_ConfigStruct_D.speed = GPIO_SPEED_50MHz;
+  GPIO_Config(GPIOD, &GPIO_ConfigStruct_D);
+}
+
 void config_gpio_data_out(void) {
 	GPIO_Config_T GPIO_ConfigStruct;
 	
@@ -101,7 +141,7 @@ void config_gpio_pb5(void) {
 void rd_wr_mreq_reset() {
 	GPIO_WriteBitValue(GPIOC, GPIO_PIN_9, 1); // rd high to disable rd
 	GPIO_WriteBitValue(GPIOC, GPIO_PIN_8, 1); // wr high to disable wr
-	GPIO_WriteBitValue(GPIOC, GPIO_PIN_10, 1); //mreq/CS high
+	GPIO_WriteBitValue(GPIOC, GPIO_PIN_10, 0); //mreq/CS low
 }
 
 void CS(int level) {
@@ -109,7 +149,7 @@ void CS(int level) {
 }
 
 void CS2(int level) {
-	GPIO_WriteBitValue(GPIOC, GPIO_PIN_0, level);
+	GPIO_WriteBitValue(GPIOC, GPIO_PIN_0, !level);
 }
 
 void WR(int level) {
@@ -134,9 +174,13 @@ void set_address(uint16_t address) {
 	}
 }
 
-void set_address_gba(unsigned long address) {
-	int level;
+void set_address_gba(uint32_t address) {
 	
+	int level;
+	for (int i = 23; i >= 0; i--) {
+		level = (address >> i) & 1;
+		GPIO_WriteBitValue(address_pin_gba[i].gpiox, address_pin_gba[i].pin, level);
+	}
 }
 
 
@@ -158,6 +202,42 @@ uint8_t read_byte(uint16_t address) {
 	}
 	rd_wr_mreq_reset();
 	return bval;
+}
+
+uint16_t read_word(uint32_t address) {
+	address = address >> 1;
+	WR(1);
+	RD(1);
+	CS(1);
+	
+  set_address_gba(address);
+	__ASM volatile("nop");
+  __ASM volatile("nop");
+  __ASM volatile("nop");
+  CS(0);
+	config_gba_data_gpio();
+	RD(0);
+
+    // wait 3 machine cycles
+
+	
+  __ASM volatile("nop");
+  __ASM volatile("nop");
+  __ASM volatile("nop");
+	__ASM volatile("nop");
+
+  uint16_t wval = 0;
+
+  for (int i = 15; i >= 0; i--) {
+      int level = GPIO_ReadInputBit(data_pin_gba[i].gpiox, data_pin_gba[i].pin);
+      wval = wval | level << i;
+  }	
+	
+	//24 pins address output and CS/RD high
+	extern void switchMode(int mode);
+	switchMode(1);
+		
+  return wval;
 }
 
 

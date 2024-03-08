@@ -20,6 +20,11 @@ uint16_t romBanks = 0;
 uint16_t ramSize = 0;
 uint16_t ramBanks = 0;
 uint16_t ramEndAddress = 0;
+uint8_t sdBuffer[521];
+unsigned long cartSize;
+uint8_t saveType;
+char cartID[5]; 
+
 
 void Delay(void){
     volatile uint32_t delay = 0xfffff;
@@ -135,9 +140,58 @@ void readram(void) {
 // end GB/GBC
 
 // GBA
-void readHeader_GBA(void){
+
+void readHeader_GBA(void) {
+	RD(1);
+	WR(1);
+	CS(0);
+	CS2(0);
 	
+	char saveTypeStr[14];
+	for (int currWord = 0; currWord < 0xC0; currWord +=2) {
+		uint16_t word = read_word(currWord);
+		sdBuffer[currWord] = word & 0xFF;
+		sdBuffer[currWord + 1] = (word >> 8) & 0xFF;
+	}
+	
+	uint16_t logoChecksum = 0;
+  for (int currByte = 0x4; currByte < 0xA0; currByte++) {
+    logoChecksum += sdBuffer[currByte];
+  }
+	
+	USBD_TxData(USBD_EP_1, sdBuffer, sizeof(sdBuffer));
+	
+	if(logoChecksum != 0x4B1B) {
+		char message[256];
+		strcpy(message, "error cart\n");
+		USBD_TxData(USBD_EP_1, (uint8_t*)message, strlen(message));
+	} else{
+		char tempStr2[2];
+		char tempStr[5];
+		char data2send[17];
+		
+		cartSize = 0;
+		saveType = 0;
+		
+		for (int i = 0 ; i < 12; i++) {
+			data2send[i] = sdBuffer[160+i];
+			if(data2send[i] == 32) {
+				data2send[i] = 95;
+			}
+		}
+		data2send[12] = 45;
+		data2send[13] = sdBuffer[172];
+		data2send[14] = sdBuffer[173];
+		data2send[15] = sdBuffer[174];
+		data2send[16] = sdBuffer[175];
+		
+		USBD_TxData(USBD_EP_1, (uint8_t*)data2send, strlen(data2send));
+		// send gameTile-Code
+		memset(data2send, 0, sizeof(data2send));
+		
+	}
 }
+
 
 void switchMode(int mode) {
 	if(mode == 0) { // 0, GB/GBC mode
@@ -148,6 +202,10 @@ void switchMode(int mode) {
 	else if(mode == 1) { //1, GBA mode
 		config_sig_addr_gpio();
 		config_gpio_data_out(); // GB data pins is GBA addr pins
+		RD(1);
+		WR(1);
+		CS(1);
+		CS2(1);
 	}
 }
  
