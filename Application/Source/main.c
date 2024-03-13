@@ -161,12 +161,14 @@ void readHeader_GBA(int time) {
     logoChecksum += sdBuffer[currByte];
   }
 	
+	/*
 	if(logoChecksum != 0x4B1B) {
 		char message[256];
 		strcpy(message, "ErrorCart..........");
 		USBD_TxData(USBD_EP_1, (uint8_t*)message, strlen(message));
 		memset(message, 0, sizeof(message));
 	} else{
+	*/
 		char data2send[18];
 		
 		for (int i = 0 ; i < 12; i++) {
@@ -188,7 +190,7 @@ void readHeader_GBA(int time) {
 		// send gameTile-Code
 		memset(data2send, 0, sizeof(data2send));
 		memset(sdBuffer, 0, sizeof(sdBuffer));
-	}
+	//}
 }
 
 void dump_GBA(int size_type) { 
@@ -266,10 +268,19 @@ int main(void) {
 	// usb cdc
 	CDC_Init();
 	
-	//switchMode(0); // default GB/GBC mode
+	// config PB0 in for get switch info
+	// PB0 high = GBA Mode; PB0 low = GB/GBC Mode
+	GPIO_Config_T GPIO_ConfigStruct;
 	
-	switchMode(1); // set gba mode
+	RCM_EnableAPB2PeriphClock((RCM_APB2_PERIPH_T)(RCM_APB2_PERIPH_GPIOB));
+	GPIO_ConfigStruct.mode = GPIO_MODE_IN_PD;
+  GPIO_ConfigStruct.pin = GPIO_PIN_0;
+  GPIO_ConfigStruct.speed = GPIO_SPEED_50MHz;
+  GPIO_Config(GPIOB, &GPIO_ConfigStruct);
 	
+	int mode = GPIO_ReadInputBit(GPIOB, GPIO_PIN_0);
 	
+	switchMode(mode); // set mode
+
 	while(1){}
 }
