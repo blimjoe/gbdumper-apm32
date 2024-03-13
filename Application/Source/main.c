@@ -20,8 +20,8 @@ uint16_t romBanks = 0;
 uint16_t ramSize = 0;
 uint16_t ramBanks = 0;
 uint16_t ramEndAddress = 0;
-uint8_t sdBuffer[521];
-unsigned long cartSize;
+uint8_t sdBuffer[512];
+unsigned long cartSize_gba;
 uint8_t saveType;
 char cartID[5]; 
 
@@ -141,37 +141,33 @@ void readram(void) {
 
 // GBA
 
-void readHeader_GBA(void) {
+void readHeader_GBA(int time) {
 	RD(1);
 	WR(1);
-	CS(0);
-	CS2(0);
+	CS(1);
+	CS2(1);
 	
-	char saveTypeStr[14];
+	//read_word(0x0);
 	for (int currWord = 0; currWord < 0xC0; currWord +=2) {
 		uint16_t word = read_word(currWord);
 		sdBuffer[currWord] = word & 0xFF;
 		sdBuffer[currWord + 1] = (word >> 8) & 0xFF;
 	}
 	
+	// USBD_TxData(USBD_EP_1, sdBuffer, sizeof(sdBuffer));
+	
 	uint16_t logoChecksum = 0;
   for (int currByte = 0x4; currByte < 0xA0; currByte++) {
     logoChecksum += sdBuffer[currByte];
   }
 	
-	USBD_TxData(USBD_EP_1, sdBuffer, sizeof(sdBuffer));
-	
 	if(logoChecksum != 0x4B1B) {
 		char message[256];
-		strcpy(message, "error cart\n");
+		strcpy(message, "ErrorCart..........");
 		USBD_TxData(USBD_EP_1, (uint8_t*)message, strlen(message));
+		memset(message, 0, sizeof(message));
 	} else{
-		char tempStr2[2];
-		char tempStr[5];
-		char data2send[17];
-		
-		cartSize = 0;
-		saveType = 0;
+		char data2send[18];
 		
 		for (int i = 0 ; i < 12; i++) {
 			data2send[i] = sdBuffer[160+i];
@@ -184,57 +180,66 @@ void readHeader_GBA(void) {
 		data2send[14] = sdBuffer[173];
 		data2send[15] = sdBuffer[174];
 		data2send[16] = sdBuffer[175];
+		data2send[17] = '\0';
 		
-		USBD_TxData(USBD_EP_1, (uint8_t*)data2send, strlen(data2send));
+		if(time == 1) {
+			USBD_TxData(USBD_EP_1, (uint8_t*)data2send, strlen(data2send));
+		}
 		// send gameTile-Code
 		memset(data2send, 0, sizeof(data2send));
-		
+		memset(sdBuffer, 0, sizeof(sdBuffer));
 	}
 }
-/*
-void dump_GBA(void) {
+
+void dump_GBA(int size_type) { 
 	RD(1);
 	WR(1);
-	CS(0);
-	CS2(0);
+	CS(1);
+	CS2(1);
+	
+	// get size
+	// 1 = 1M, =2=4M, =3=8M, =4=16M, =5=32M;
+	unsigned long gba_size;
+	char message[256];
+	switch(size_type) {
+		case 1:
+			gba_size = 1048576;
+			break;
+		
+		case 2:
+			gba_size = 4194304;
+			break;
+		
+		case 3:
+			gba_size = 8388608;
+			break;
+		
+		case 4:
+			gba_size = 16777216;
+			break;
+		
+		case 5:
+			gba_size = 33554432;
+			break;
+		
+		default:
+			gba_size = 0;
+			break;
+	}
+	USBD_TxData(USBD_EP_1, (uint8_t*)message, strlen(message));
+	memset(message, 0, sizeof(message));
 	
 	uint32_t romAddress = 0x0;
-	int count = 0;
-	for(uint32_t romAddress = 0x0; romAddress < 0x8000000; romAddress += 2) {
-		uint16_t word = read_word(romAddress);
+	read_word(0x0);
+	while(gba_size != 0 && romAddress < gba_size) {
 		uint8_t readData[64];
-		readData[count] = word & 0xFF;
-		count++;
-		readData[count] = (word >> 8) & 0xFF;
-		count++;
-		if(count == 63) {
-			USBD_TxData(USBD_EP_1, readData, sizeof(readData));
-			__ASM volatile("nop");
-			__ASM volatile("nop");
-			__ASM volatile("nop");
-			count = 0;
+		for(int i = 0; i < 64; i +=2) {
+			uint16_t word = read_word(romAddress+i);
+			readData[i] = word & 0xFF;
+			readData[i+1] = (word >> 8) & 0xFF;
 		}
-		if(romAddress == 0x7ffffff && count !=0 ) {
-			USBD_TxData(USBD_EP_1, readData, sizeof(readData));
-		}
-	}
-	if(count != 0){
-	}
-}
-*/
-void dump_GBA(void) {
-	RD(1);
-	WR(1);
-	CS(0);
-	CS2(0);
-	
-	char saveTypeStr[14];
-	for (int currWord = 0; currWord < 0x8000000; currWord +=2) {
-		uint16_t word = read_word(currWord);
-		uint8_t byte1 = word & 0xFF;
-		uint8_t byte2 = (word >> 8) & 0xFF;
-		USBD_TxData(USBD_EP_1, &byte1, 1);
-		USBD_TxData(USBD_EP_1, &byte2, 1);
+		USBD_TxData(USBD_EP_1, readData, sizeof(readData));
+		romAddress += 64;
 	}
 }
 

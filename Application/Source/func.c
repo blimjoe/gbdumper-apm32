@@ -218,7 +218,7 @@ uint16_t read_word(uint32_t address) {
 	config_gba_data_gpio();
 	RD(0);
 
-    // wait 3 machine cycles
+    // wait 4 machine cycles
 
 	
   __ASM volatile("nop");

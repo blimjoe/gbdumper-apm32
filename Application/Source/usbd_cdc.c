@@ -46,6 +46,8 @@ static uint8_t dataBuf[256] = {0};
 
 static void USBD_VCP_SetConfigCallBack(void);
 
+int SIZETYPE = 0;
+
 /* Standard Request handler */
 USBD_StdReqCallback_T stdReqCallback =
 {
@@ -138,19 +140,46 @@ void USBD_VCP_OutEpCallback(uint8_t ep)
 					extern void readram(void);
 					readram();
 				}
-				#if 0
 				else if (memcmp(dataBuf, "0", 1) == 0) {
-					extern void Debug(void);
-					Debug();
+					// sending gba cart size
+					// buf[1] = 1 = 1M, =2=4M, =3=8M, =4=16M, =5=32M;
+					if (memcmp(dataBuf, "01", 2) == 0) { // 1M
+						SIZETYPE = 1;
+						strcpy(message, "success set size 01M");
+					}
+					else if (memcmp(dataBuf, "02", 2) == 0) { // 4M
+						SIZETYPE = 2;
+						strcpy(message, "success set size 04M");
+					}
+					else if (memcmp(dataBuf, "03", 2) == 0) { //8M
+						SIZETYPE = 3;
+						strcpy(message, "success set size 8M");
+					}
+					else if (memcmp(dataBuf, "04", 2) == 0) { //16M
+						SIZETYPE = 4;
+						strcpy(message, "success set size 16M");
+					}
+					else if (memcmp(dataBuf, "05", 2) == 0) { //32M
+						SIZETYPE = 5;
+						strcpy(message, "success set size 32M");
+					}
+					else {
+						SIZETYPE = 0;
+						strcpy(message, "failed");
+					}
+					USBD_TxData(USBD_EP_1, (uint8_t*)message, strlen(message)+1);
+					memset(message, 0, sizeof(message));
 				}
-				#endif
 				else if (memcmp(dataBuf, "4", 1) == 0) {
-					extern void readHeader_GBA();
-					readHeader_GBA();
+					extern void readHeader_GBA(int time);
+					readHeader_GBA(1);
         }
 				else if (memcmp(dataBuf, "5", 1) == 0) {
-					extern void dump_GBA(void);
-					dump_GBA();
+					if(SIZETYPE != 0){
+						extern void dump_GBA(int size_type);
+						dump_GBA(SIZETYPE);
+					}
+					
         }
 				else {
 					strcpy(message, "unknown");
@@ -174,8 +203,8 @@ void USBD_VCP_InEpCallback(uint8_t ep)
     if (ep == USBD_EP_1)
     {
 			memset(dataBuf, 0, sizeof(dataBuf));
-       //USBD_RxData(USBD_EP_1, dataBuf, g_usbDev.outBuf[USBD_EP_1].maxPackSize);
-			USBD_RxData(USBD_EP_1, dataBuf, 1);
+      USBD_RxData(USBD_EP_1, dataBuf, g_usbDev.outBuf[USBD_EP_1].maxPackSize);
+			//USBD_RxData(USBD_EP_1, dataBuf, 1);
     }
 }
 
