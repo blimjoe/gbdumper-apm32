@@ -251,7 +251,7 @@ int switchMode(void) {
 		config_sig_addr_gpio();
 		rd_wr_mreq_reset();
 		config_gpio_data_in();
-		GPIO_SetBit(GPIOC, GPIO_PIN_14);
+		GPIO_ResetBit(GPIOC, GPIO_PIN_14);
 	}
 	else if(mode == 1) { //1, GBA mode
 		config_sig_addr_gpio();
@@ -260,9 +260,9 @@ int switchMode(void) {
 		WR(1);
 		CS(1);
 		CS2(1);
-		GPIO_ResetBit(GPIOC, GPIO_PIN_14);
+		GPIO_SetBit(GPIOC, GPIO_PIN_14);
 	}
-	Delay();
+	nop_delay(20);
 	return mode;
 }
  

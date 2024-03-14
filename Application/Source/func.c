@@ -120,16 +120,17 @@ void config_gpio_data_in(void) {
 }
 
 void config_gpio_vcc(void) {
-	RCM_ConfigLSE(RCM_LSE_CLOSE);
-	//RCM_EnableAPB2PeriphClock(RCM_APB2_PERIPH_AFIO);
-	//GPIO_ConfigPinRemap(GPIO_REMAP_PD01);
-	
-	GPIO_Config_T GPIO_ConfigStruct;
+		GPIO_Config_T  configStruct;
 
-	GPIO_ConfigStruct.mode = GPIO_MODE_OUT_PP;
-  GPIO_ConfigStruct.pin = GPIO_PIN_14;
-  GPIO_ConfigStruct.speed = GPIO_SPEED_2MHz;
-  GPIO_Config(GPIOC, &GPIO_ConfigStruct);
+    /* Enable the GPIO_LED Clock */
+    RCM_EnableAPB2PeriphClock(RCM_APB2_PERIPH_GPIOC);
+		RCM_ConfigHSE(RCM_HSE_CLOSE);
+
+    /* Configure the GPIO_LED pin */
+    configStruct.pin = GPIO_PIN_13|GPIO_PIN_14|GPIO_PIN_15;
+    configStruct.mode = GPIO_MODE_OUT_PP;
+    configStruct.speed = GPIO_SPEED_2MHz;
+    GPIO_Config(GPIOC, &configStruct);
 }
 
 void config_gpio_pb5(void) {
@@ -187,6 +188,11 @@ void set_address_gba(uint32_t address) {
 	}
 }
 
+void nop_delay(int times) {
+	for (int i = 0; i < times; i++) {
+		__ASM volatile("nop");
+	}
+}
 
 uint8_t read_byte(uint16_t address) {
 	set_address(address);

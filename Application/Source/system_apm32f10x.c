@@ -3,7 +3,7 @@
  *
  * @brief       CMSIS Cortex-M3 Device Peripheral Access Layer System Source File
  *
- * @version     V1.0.4
+ * @version     V1.0.3
  *
  * @date        2022-12-01
  *
@@ -23,18 +23,18 @@
  *  and limitations under the License.
  */
 
-/* Includes */
+/*Includes*/
 #include "apm32f10x.h"
 
 /** @addtogroup Examples
   @{
-*/
+  */
 
-/** @addtogroup USB_CDC_VirtualCOMPort
+/** @addtogroup GPIO_Toggle
   @{
-*/
+  */
 
-/** @defgroup USB_CDC_VirtualCOMPort_System_Macros System_Macros
+/** @defgroup GPIO_Toggle_System_Macros System_Macros
   @{
 */
 
@@ -49,9 +49,9 @@
 /* #define VECT_TAB_SRAM */
 #define VECT_TAB_OFFSET     0x00
 
-/**@} end of group USB_CDC_VirtualCOMPort_System_Macros */
+/**@} end of group GPIO_Toggle_System_Macros*/
 
-/** @defgroup USB_CDC_VirtualCOMPort_System_Variables System_Variables
+/** @defgroup GPIO_Toggle_System_Variables System_Variables
   @{
 */
 
@@ -71,9 +71,9 @@
     uint32_t SystemCoreClock         = SYSTEM_CLOCK_96MHz;
 #endif
 
-/**@} end of group USB_CDC_VirtualCOMPort_System_Variables */
+/**@} end of group GPIO_Toggle_System_Variables*/
 
-/** @defgroup USB_CDC_VirtualCOMPort_System_Functions System_Functions
+/** @defgroup GPIO_Toggle_System_Functions System_Functions
   @{
 */
 
@@ -125,7 +125,7 @@ void SystemInit(void)
 #ifdef APM32F10X_CL
     /* Reset PLL2ON and PLL3ON bits */
     RCM->CTRL &= (uint32_t) 0xEBFFFFFF;
-    /* Disable all interrupts and clear pending bits */
+    /* Disable all interrupts and clear pending bits  */
     RCM->INT = 0x00FF0000;
     /* Reset CFG2 register */
     RCM->CFG2 = 0x00000000;
@@ -180,7 +180,7 @@ void SystemCoreClockUpdate(void)
 #ifdef APM32F10X_CL
             /* NOTE : PLL is the same as PLL1 */
             pllSource = RCM->CFG_B.PLL1SRCSEL;
-
+            
             /* PLL entry clock source is HSE */
             if (pllSource)
             {
@@ -192,7 +192,7 @@ void SystemCoreClockUpdate(void)
                 {
                     pll2Mull = (RCM->CFG2_B.PLL2MUL != 15) ? (RCM->CFG2_B.PLL2MUL + 2) : 20;
                     pllPsc2 = RCM->CFG2_B.PLLPSC2 + 1;
-
+                    
                     pllSource = ((HSE_VALUE / pllPsc2) * pll2Mull) / pllPsc1;
                 }
                 /* PLL entry clock source is HSE */
@@ -391,7 +391,7 @@ static void SystemClock24M(void)
         RCM->CFG_B.PLL1SRCSEL = 1;
         RCM->CFG_B.PLL1MULCFG = 4;
 #else
-        /* PLL configuration: PLLCLK = (HSE / 2) * 6 = 24 MHz */
+        /*  PLL configuration: PLLCLK = (HSE / 2) * 6 = 24 MHz */
         /* PLL: (HSE / 2) * 6 */
         RCM->CFG_B.PLL1SRCSEL = 1;
         RCM->CFG_B.PLLHSEPSC = 1;
@@ -467,7 +467,7 @@ static void SystemClock36M(void)
         RCM->CFG_B.PLL1SRCSEL = 1;
         RCM->CFG_B.PLL1MULCFG = 7;
 #else
-        /* PLL configuration: PLLCLK = (HSE / 2) * 9 = 36 MHz */
+        /*  PLL configuration: PLLCLK = (HSE / 2) * 9 = 36 MHz */
         /* PLL: (HSE / 2) * 9 */
         RCM->CFG_B.PLL1SRCSEL = 1;
         RCM->CFG_B.PLLHSEPSC = 1;
@@ -575,17 +575,17 @@ static void SystemClock56M(void)
 {
     __IO uint32_t i;
 
-    RCM->CTRL_B.HSEEN = BIT_SET;
+    RCM->CTRL_B.HSIEN = BIT_SET;
 
-    for (i = 0; i < HSE_STARTUP_TIMEOUT; i++)
-    {
-        if (RCM->CTRL_B.HSERDYFLG)
-        {
-            break;
-        }
-    }
+//    for (i = 0; i < HSE_STARTUP_TIMEOUT; i++)
+//    {
+//        if (RCM->CTRL_B.HSERDYFLG)
+//        {
+//            break;
+//        }
+//    }
 
-    if (RCM->CTRL_B.HSERDYFLG)
+    if (RCM->CTRL_B.HSIRDYFLG)
     {
         /* Enable Prefetch Buffer */
         FMC->CTRL1_B.PBEN = BIT_SET;
@@ -618,7 +618,7 @@ static void SystemClock56M(void)
         RCM->CFG_B.PLL1MULCFG = 5;
 #else
         /* PLL: HSE * 7 */
-        RCM->CFG_B.PLL1SRCSEL = 1;
+        RCM->CFG_B.PLL1SRCSEL = 0;
         RCM->CFG_B.PLL1MULCFG = 5;
 #endif
 
@@ -786,6 +786,6 @@ static void SystemClock96M(void)
 }
 #endif
 
-/**@} end of group USB_CDC_VirtualCOMPort_System_Functions */
-/**@} end of group USB_CDC_VirtualCOMPort */
+/**@} end of group GPIO_Toggle_System_Functions */
+/**@} end of group GPIO_Toggle */
 /**@} end of group Examples */
