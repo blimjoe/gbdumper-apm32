@@ -129,14 +129,20 @@ void USBD_VCP_OutEpCallback(uint8_t ep)
         dataCnt = g_usbDev.outBuf[USBD_EP_1].xferCnt;
 
         if (memcmp(dataBuf, "1", 1) == 0) {
+					extern int switchMode(void);
+					switchMode();
 					extern void readHeader();
 					readHeader();
         }
         else if (memcmp(dataBuf, "2", 1) == 0) {
+					extern int switchMode(void);
+					switchMode();
 					extern void dumpRom(void);
 					dumpRom();
         }
 				else if (memcmp(dataBuf, "3", 1) == 0) {
+					extern int switchMode(void);
+					switchMode();
 					extern void readram(void);
 					readram();
 				}
@@ -171,10 +177,14 @@ void USBD_VCP_OutEpCallback(uint8_t ep)
 					memset(message, 0, sizeof(message));
 				}
 				else if (memcmp(dataBuf, "4", 1) == 0) {
+					extern int switchMode(void);
+					switchMode();
 					extern void readHeader_GBA(int time);
 					readHeader_GBA(1);
         }
 				else if (memcmp(dataBuf, "5", 1) == 0) {
+					extern int switchMode(void);
+					switchMode();
 					if(SIZETYPE != 0){
 						extern void dump_GBA(int size_type);
 						dump_GBA(SIZETYPE);

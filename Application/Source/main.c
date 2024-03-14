@@ -245,11 +245,13 @@ void dump_GBA(int size_type) {
 	}
 }
 
-void switchMode(int mode) {
+int switchMode(void) {
+	int mode = GPIO_ReadInputBit(GPIOB, GPIO_PIN_0);
 	if(mode == 0) { // 0, GB/GBC mode
 		config_sig_addr_gpio();
 		rd_wr_mreq_reset();
 		config_gpio_data_in();
+		GPIO_SetBit(GPIOC, GPIO_PIN_14);
 	}
 	else if(mode == 1) { //1, GBA mode
 		config_sig_addr_gpio();
@@ -258,7 +260,10 @@ void switchMode(int mode) {
 		WR(1);
 		CS(1);
 		CS2(1);
+		GPIO_ResetBit(GPIOC, GPIO_PIN_14);
 	}
+	Delay();
+	return mode;
 }
  
 int main(void) {
@@ -277,10 +282,13 @@ int main(void) {
   GPIO_ConfigStruct.pin = GPIO_PIN_0;
   GPIO_ConfigStruct.speed = GPIO_SPEED_50MHz;
   GPIO_Config(GPIOB, &GPIO_ConfigStruct);
+	// Config PB0 end
 	
-	int mode = GPIO_ReadInputBit(GPIOB, GPIO_PIN_0);
+	// PC14 test 
+	// PC14 low->3.3v high->5v
+	config_gpio_vcc();
 	
-	switchMode(mode); // set mode
-
-	while(1){}
+	switchMode();
+	while(1){
+	}
 }

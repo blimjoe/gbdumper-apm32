@@ -120,6 +120,10 @@ void config_gpio_data_in(void) {
 }
 
 void config_gpio_vcc(void) {
+	RCM_ConfigLSE(RCM_LSE_CLOSE);
+	//RCM_EnableAPB2PeriphClock(RCM_APB2_PERIPH_AFIO);
+	//GPIO_ConfigPinRemap(GPIO_REMAP_PD01);
+	
 	GPIO_Config_T GPIO_ConfigStruct;
 
 	GPIO_ConfigStruct.mode = GPIO_MODE_OUT_PP;
