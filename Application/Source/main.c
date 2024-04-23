@@ -245,6 +245,9 @@ void dump_GBA(int size_type) {
 	}
 }
 
+void readram_gba(int save_type){
+}
+
 int switchMode(void) {
 	int mode = GPIO_ReadInputBit(GPIOB, GPIO_PIN_0);
 	if(mode == 0) { // 0, GB/GBC mode
@@ -264,6 +267,15 @@ int switchMode(void) {
 	}
 	nop_delay(20);
 	return mode;
+}
+
+int getMode() {
+	// CartType
+	// 0, GB/GBC
+	// 1, GBA
+	int CartType = GPIO_ReadInputBit(GPIOB, GPIO_PIN_0);
+	
+	return CartType;
 }
  
 int main(void) {

@@ -189,8 +189,18 @@ void USBD_VCP_OutEpCallback(uint8_t ep)
 						extern void dump_GBA(int size_type);
 						dump_GBA(SIZETYPE);
 					}
-					
         }
+				else if (memcmp(dataBuf, "6", 1) == 0) {
+					extern int getMode();
+					int CartType = getMode();
+					if (CartType) {
+						strcpy(message, "GBA Mode");
+					} else {
+						strcpy(message, "GBC Mode");
+					}
+					USBD_TxData(USBD_EP_1, (uint8_t*)message, strlen(message)+1);
+					memset(message, 0, sizeof(message));
+				}
 				else {
 					strcpy(message, "unknown");
 					USBD_TxData(USBD_EP_1, (uint8_t*)message, strlen(message)+1);
