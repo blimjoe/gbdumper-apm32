@@ -37,7 +37,7 @@ void readHeader() {
 	
 	for(uint16_t romAddress = 0x0134; romAddress <= 0x143; romAddress++) {
 		char headerChar = (char)read_byte(romAddress);
-		if (headerChar >= 0x0020 && headerChar <= 0x7E && headerChar != 0x10) {
+		if (headerChar >= 0x0020 && headerChar <= 0x7E) {
 			gameTitle[(romAddress-0x0134)] = headerChar;
 		}
 	}
@@ -95,7 +95,7 @@ void dumpRom(void) {
 		// Read up to 7FFF per bank
 		while (romAddress <= 0x7FFF) {
 			uint8_t readData[64];
-			for(uint8_t i = 0; i < 64; i++){
+			for(int i = 0; i < 64; i++){
 				readData[i] = read_byte(romAddress+i);
 			}
 			// usb write
@@ -235,10 +235,9 @@ void dump_GBA(int size_type) {
 	read_word(0x0);
 	while(gba_size != 0 && romAddress < gba_size) {
 		uint8_t readData[64];
-		for(int i = 0; i < 64; i +=2) {
+		for(uint8_t i = 0; i < 64; i +=2) {
 			uint16_t word = read_word(romAddress+i);
-			readData[i] = word & 0xFF;
-			readData[i+1] = (word >> 8) & 0xFF;
+			memcpy(&readData[i], &word, sizeof(uint16_t));
 		}
 		USBD_TxData(USBD_EP_1, readData, sizeof(readData));
 		romAddress += 64;
