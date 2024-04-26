@@ -409,6 +409,11 @@
               <FileType>5</FileType>
               <FilePath>.\Application\Include\pin_out.h</FilePath>
             </File>
+            <File>
+              <FileName>emuDump.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Application\Source\emuDump.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

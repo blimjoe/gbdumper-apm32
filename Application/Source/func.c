@@ -5,6 +5,7 @@
 #include <func.h>
 #include <string.h>
 #include <pin_out.h>
+#include <stdio.h>
 
 void debug_log(char log[256]){
 	char message[256];
@@ -214,6 +215,7 @@ uint8_t read_byte(uint16_t address) {
 	return bval;
 }
 
+#if 1
 uint16_t read_word(uint32_t address) {
 	address = address >> 1;
 	WR(1);
@@ -249,6 +251,140 @@ uint16_t read_word(uint32_t address) {
 		
   return wval;
 }
+#endif
+
+#if 0
+uint16_t read_word(uint32_t address) {
+	address = address >> 1;
+	WR(1);
+	RD(1);
+	CS(1);
+	
+  set_address_gba(address);
+	__ASM volatile("nop");
+	
+  CS(0);
+	config_gba_data_gpio();
+	RD(0);
+
+  __ASM volatile("nop");
+  uint16_t wval = 0;
+	uint16_t wval1 = 0;
+	char message[256];
+	
+	uint16_t a = GPIO_ReadInputPort(GPIOA);
+	uint16_t b = GPIO_ReadInputPort(GPIOB);
+	uint16_t c = GPIO_ReadInputPort(GPIOC);
+	uint16_t d = GPIO_ReadInputPort(GPIOD);
+	
+	#if 1
+	strcpy(message, "a = ");
+	USBD_TxData(USBD_EP_1, (uint8_t*)message, strlen(message));
+	memset(message, 0, sizeof(message));
+	snprintf(message, sizeof(message), "%d", a);
+	USBD_TxData(USBD_EP_1, (uint8_t*)message, strlen(message));
+	memset(message, 0, sizeof(message));
+	strcpy(message, "\n\r");
+	USBD_TxData(USBD_EP_1, (uint8_t*)message, strlen(message));
+	memset(message, 0, sizeof(message));
+	
+	strcpy(message, "b = ");
+	USBD_TxData(USBD_EP_1, (uint8_t*)message, strlen(message));
+	memset(message, 0, sizeof(message));
+	snprintf(message, sizeof(message), "%d", b);
+	USBD_TxData(USBD_EP_1, (uint8_t*)message, strlen(message));
+	memset(message, 0, sizeof(message));
+	strcpy(message, "\n\r");
+	USBD_TxData(USBD_EP_1, (uint8_t*)message, strlen(message));
+	memset(message, 0, sizeof(message));
+			
+	strcpy(message, "c = ");
+	USBD_TxData(USBD_EP_1, (uint8_t*)message, strlen(message));
+	memset(message, 0, sizeof(message));
+	snprintf(message, sizeof(message), "%d", c);
+	USBD_TxData(USBD_EP_1, (uint8_t*)message, strlen(message));
+	memset(message, 0, sizeof(message));
+	strcpy(message, "\n\r");
+	USBD_TxData(USBD_EP_1, (uint8_t*)message, strlen(message));
+	memset(message, 0, sizeof(message));
+	
+	strcpy(message, "d = ");
+	USBD_TxData(USBD_EP_1, (uint8_t*)message, strlen(message));
+	memset(message, 0, sizeof(message));
+	snprintf(message, sizeof(message), "%d", d);
+	USBD_TxData(USBD_EP_1, (uint8_t*)message, strlen(message));
+	memset(message, 0, sizeof(message));
+	strcpy(message, "\n\r");
+	USBD_TxData(USBD_EP_1, (uint8_t*)message, strlen(message));
+	memset(message, 0, sizeof(message));
+	#endif
+		
+#if 0		
+	wval = wval | ((a & 0x8000) >> 15);
+	wval = wval | ((a & 0x4000) >> 14);
+	wval = wval | ((a & 0x2000) >> 13);
+	wval = wval | ((c & 0x1000) >> 12);
+	wval = wval | ((c & 0x800) >> 11);
+	wval = wval | ((a & 0x400) >> 10);
+	wval = wval | ((a & 0x200) >> 9);
+	wval = wval | ((a & 0x100) >> 8);
+	wval = wval | ((b & 0x80) >> 7);
+	wval = wval | ((b & 0x40) >> 6);
+	wval = wval | ((d & 0x4) >> 5);
+	wval = wval | ((b & 0x10) >> 4);
+	wval = wval | ((b & 0x8) >> 3);
+	wval = wval | ((b & 0x4) >> 2);
+	wval = wval | ((c & 0x40) >> 1);
+	wval = wval | ((c & 0x20) >> 0);
+	#endif
+	
+	wval |= ((a & 0xE000) >> 13);
+	wval |= ((c & 0x1800) >> 8);
+	
+	  for (int i = 15; i >= 0; i--) {
+      int level = GPIO_ReadInputBit(data_pin_gba[i].gpiox, data_pin_gba[i].pin);
+      wval1 = wval1 | level << i;
+  }
+
+	#if 1
+		if(wval == wval1) {
+			strcpy(message, "!!!wval = wval1");
+			USBD_TxData(USBD_EP_1, (uint8_t*)message, strlen(message));
+			memset(message, 0, sizeof(message));
+			strcpy(message, "\n\r");
+			USBD_TxData(USBD_EP_1, (uint8_t*)message, strlen(message));
+			memset(message, 0, sizeof(message));
+		}
+		else {
+			strcpy(message, "wval1 = ");
+			USBD_TxData(USBD_EP_1, (uint8_t*)message, strlen(message));
+			memset(message, 0, sizeof(message));
+			snprintf(message, sizeof(message), "%d", wval1);
+			USBD_TxData(USBD_EP_1, (uint8_t*)message, strlen(message));
+			memset(message, 0, sizeof(message));
+			strcpy(message, "\n\r");
+			USBD_TxData(USBD_EP_1, (uint8_t*)message, strlen(message));
+			memset(message, 0, sizeof(message));
+			strcpy(message, "wval = ");
+			USBD_TxData(USBD_EP_1, (uint8_t*)message, strlen(message));
+			memset(message, 0, sizeof(message));
+			snprintf(message, sizeof(message), "%d", wval);
+			USBD_TxData(USBD_EP_1, (uint8_t*)message, strlen(message));
+			memset(message, 0, sizeof(message));
+			strcpy(message, "\n\r");
+			USBD_TxData(USBD_EP_1, (uint8_t*)message, strlen(message));
+			memset(message, 0, sizeof(message));
+		}
+		#endif
+
+	
+
+	extern void switchMode(int mode);
+	switchMode(1);
+	
+	return wval;
+}
+#endif
 
 
 void write_byte(uint16_t address, uint8_t data){
