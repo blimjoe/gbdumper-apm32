@@ -37,7 +37,7 @@ void readHeader() {
 	
 	for(uint16_t romAddress = 0x0134; romAddress <= 0x143; romAddress++) {
 		char headerChar = (char)read_byte(romAddress);
-		if (headerChar >= 0x0020 && headerChar <= 0x7E) {
+		if (headerChar >= 0x0020 && headerChar <= 0x7E && headerChar != 0x10) {
 			gameTitle[(romAddress-0x0134)] = headerChar;
 		}
 	}

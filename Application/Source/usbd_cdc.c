@@ -29,6 +29,7 @@
 #include "usbd_class_cdc.h"
 #include <string.h>
 #include <main.h>
+#include <stdio.h>
 
 /** @addtogroup Examples
   @{
@@ -201,6 +202,26 @@ void USBD_VCP_OutEpCallback(uint8_t ep)
 					USBD_TxData(USBD_EP_1, (uint8_t*)message, strlen(message)+1);
 					memset(message, 0, sizeof(message));
 				}
+				
+				// emulator GB
+				// "GB/256/256/"
+				else if (memcmp(dataBuf, "GB/", 3) == 0) {
+					extern void emuGB(int startAddr, int length);
+					extern int switchMode(void);
+					switchMode();
+					strcpy(message, "Emulator GB dump");
+					USBD_TxData(USBD_EP_1, (uint8_t*)message, strlen(message)+1);
+					memset(message, 0, sizeof(message));
+					int s_addr = 0;
+					int len = 0;
+					sscanf((const char*)dataBuf, "GB/%d/%d/", &s_addr, &len);
+					snprintf(message, sizeof(message), "GB/%d/%d/", s_addr, len);
+					USBD_TxData(USBD_EP_1, (uint8_t*)message, strlen(message)+1);
+					memset(message, 0, sizeof(message));
+				}
+				
+				// end emulator GB
+				
 				else {
 					strcpy(message, "unknown");
 					USBD_TxData(USBD_EP_1, (uint8_t*)message, strlen(message)+1);
