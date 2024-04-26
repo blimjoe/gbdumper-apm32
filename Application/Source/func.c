@@ -173,11 +173,28 @@ void set_sig_read() {
 }
 
 void set_address(uint16_t address) {
+
+	#if 1
 	int level;
 	for (int i = 15; i >= 0; i--) {
 		level = (address >> i) & 1;
 		GPIO_WriteBitValue(address_pin[i].gpiox, address_pin[i].pin, level);
 	}
+	#endif
+	
+	#if 0
+	uint16_t a = GPIO_ReadOutputPort(GPIOA);
+	uint16_t b = GPIO_ReadOutputPort(GPIOB);
+	uint16_t c = GPIO_ReadOutputPort(GPIOC);
+	uint16_t d = GPIO_ReadOutputPort(GPIOD);
+
+	(address & 0x3) << 6
+	
+	GPIO_WriteOutputPort(GPIOA, a);
+	GPIO_WriteOutputPort(GPIOB, b);
+	GPIO_WriteOutputPort(GPIOC, c);
+	GPIO_WriteOutputPort(GPIOD, d);
+	#endif
 }
 
 void set_address_gba(uint32_t address) {
@@ -214,46 +231,6 @@ uint8_t read_byte(uint16_t address) {
 	return bval;
 }
 
-#if 0
-uint16_t read_word(uint32_t address) {
-	address = address >> 1;
-	WR(1);
-	RD(1);
-	CS(1);
-	
-  set_address_gba(address);
-	__ASM volatile("nop");
-  __ASM volatile("nop");
-  __ASM volatile("nop");
-  CS(0);
-	config_gba_data_gpio();
-	RD(0);
-
-    // wait 4 machine cycles
-
-	
-  __ASM volatile("nop");
-  __ASM volatile("nop");
-  __ASM volatile("nop");
-	__ASM volatile("nop");
-
-  uint16_t wval = 0;
-
-  for (int i = 15; i >= 0; i--) {
-      int level = GPIO_ReadInputBit(data_pin_gba[i].gpiox, data_pin_gba[i].pin);
-      wval = wval | level << i;
-  }	
-	
-	//24 pins address output and CS/RD high
-	extern void switchMode(int mode);
-	switchMode(1);
-		
-  return wval;
-}
-#endif
-
-#if 1
-// new read_word
 uint16_t read_word(uint32_t address) {
 	address = address >> 1;
 	WR(1);
@@ -290,7 +267,6 @@ uint16_t read_word(uint32_t address) {
 	
 	return wval;
 }
-#endif
 
 
 void write_byte(uint16_t address, uint8_t data){
