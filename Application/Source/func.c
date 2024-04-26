@@ -215,7 +215,7 @@ uint8_t read_byte(uint16_t address) {
 	return bval;
 }
 
-#if 1
+#if 0
 uint16_t read_word(uint32_t address) {
 	address = address >> 1;
 	WR(1);
@@ -253,7 +253,7 @@ uint16_t read_word(uint32_t address) {
 }
 #endif
 
-#if 0
+#if 1
 uint16_t read_word(uint32_t address) {
 	address = address >> 1;
 	WR(1);
@@ -277,7 +277,7 @@ uint16_t read_word(uint32_t address) {
 	uint16_t c = GPIO_ReadInputPort(GPIOC);
 	uint16_t d = GPIO_ReadInputPort(GPIOD);
 	
-	#if 1
+	#if 0
 	strcpy(message, "a = ");
 	USBD_TxData(USBD_EP_1, (uint8_t*)message, strlen(message));
 	memset(message, 0, sizeof(message));
@@ -319,34 +319,23 @@ uint16_t read_word(uint32_t address) {
 	memset(message, 0, sizeof(message));
 	#endif
 		
-#if 0		
-	wval = wval | ((a & 0x8000) >> 15);
-	wval = wval | ((a & 0x4000) >> 14);
-	wval = wval | ((a & 0x2000) >> 13);
-	wval = wval | ((c & 0x1000) >> 12);
-	wval = wval | ((c & 0x800) >> 11);
-	wval = wval | ((a & 0x400) >> 10);
-	wval = wval | ((a & 0x200) >> 9);
-	wval = wval | ((a & 0x100) >> 8);
-	wval = wval | ((b & 0x80) >> 7);
-	wval = wval | ((b & 0x40) >> 6);
-	wval = wval | ((d & 0x4) >> 5);
-	wval = wval | ((b & 0x10) >> 4);
-	wval = wval | ((b & 0x8) >> 3);
-	wval = wval | ((b & 0x4) >> 2);
-	wval = wval | ((c & 0x40) >> 1);
-	wval = wval | ((c & 0x20) >> 0);
-	#endif
 	
-	wval |= ((a & 0xE000) >> 13);
-	wval |= ((c & 0x1800) >> 8);
+	wval |= ((c & 0xC0) >> 6);
+	wval |= b & 0x1C;
+	wval |= ((d & 0x4) << 3);
+	wval |= b & 0xC0;
+	wval |= a & 0x700;
+	wval |= c & 0x1800;
+	wval |= a & 0xE000;
+	
+		#if 0
 	
 	  for (int i = 15; i >= 0; i--) {
       int level = GPIO_ReadInputBit(data_pin_gba[i].gpiox, data_pin_gba[i].pin);
       wval1 = wval1 | level << i;
   }
 
-	#if 1
+
 		if(wval == wval1) {
 			strcpy(message, "!!!wval = wval1");
 			USBD_TxData(USBD_EP_1, (uint8_t*)message, strlen(message));
