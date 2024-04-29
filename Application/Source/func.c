@@ -7,6 +7,9 @@
 #include <pin_out.h>
 #include <stdio.h>
 
+
+extern void asm_set_address(uint16_t address);
+
 void debug_log(char log[256]){
 	char message[256];
 	strcpy(message,log);
@@ -123,11 +126,9 @@ void config_gpio_data_in(void) {
 void config_gpio_vcc(void) {
 		GPIO_Config_T  configStruct;
 
-    /* Enable the GPIO_LED Clock */
     RCM_EnableAPB2PeriphClock(RCM_APB2_PERIPH_GPIOC);
 		RCM_ConfigHSE(RCM_HSE_CLOSE);
 
-    /* Configure the GPIO_LED pin */
     configStruct.pin = GPIO_PIN_13|GPIO_PIN_14|GPIO_PIN_15;
     configStruct.mode = GPIO_MODE_OUT_PP;
     configStruct.speed = GPIO_SPEED_2MHz;
@@ -173,8 +174,7 @@ void set_sig_read() {
 }
 
 void set_address(uint16_t address) {
-
-	#if 1
+	#if 0
 	int level;
 	for (int i = 15; i >= 0; i--) {
 		level = (address >> i) & 1;
@@ -183,27 +183,81 @@ void set_address(uint16_t address) {
 	#endif
 	
 	#if 0
+	asm_set_address(address);
+	
+	#endif
+	
+	#if 1
 	uint16_t a = GPIO_ReadOutputPort(GPIOA);
 	uint16_t b = GPIO_ReadOutputPort(GPIOB);
 	uint16_t c = GPIO_ReadOutputPort(GPIOC);
 	uint16_t d = GPIO_ReadOutputPort(GPIOD);
-
-	(address & 0x3) << 6
 	
+	
+	// clear origin bits
+	a &= ~(0b1110011100000000);
+	b &= ~(0b0000000011011100);
+	c &= ~(0b0001100011000000);
+	d &= ~(0b0000000000000100);
+	
+	// set bit
+	a |= (address & 0b1110011100000000);
+	b |= (address & 0b0000000011011100);
+	c |= (address & 0b0001100000000000);
+	c |= ((address & 0b0000000000000011) << 6);
+  d |= ((address & 0b0000000000100000) >> 3);
+	
+
 	GPIO_WriteOutputPort(GPIOA, a);
 	GPIO_WriteOutputPort(GPIOB, b);
 	GPIO_WriteOutputPort(GPIOC, c);
 	GPIO_WriteOutputPort(GPIOD, d);
+	
+	// don't know why gpiod2 cant set by gpio register ODATA
+	//GPIO_WriteBitValue(GPIOD, GPIO_PIN_2, (address >> 5) & 1);
+	
 	#endif
 }
 
 void set_address_gba(uint32_t address) {
 	
+	#if 0
 	int level;
 	for (int i = 23; i >= 0; i--) {
 		level = (address >> i) & 1;
 		GPIO_WriteBitValue(address_pin_gba[i].gpiox, address_pin_gba[i].pin, level);
 	}
+	#endif
+	
+	#if 1
+	uint16_t a = GPIO_ReadOutputPort(GPIOA);
+	uint16_t b = GPIO_ReadOutputPort(GPIOB);
+	uint16_t c = GPIO_ReadOutputPort(GPIOC);
+	uint16_t d = GPIO_ReadOutputPort(GPIOD);
+	
+	// clear origin bits
+	a &= ~(0b1110011100000000);
+	b &= ~(0b1111111111011100);
+	c &= ~(0b0001100011000000);
+	d &= ~(0b0000000000000100);
+	
+	// set bit
+	a |= (address & 0b1110011100000000);
+	b |= (address & 0b0000000011011100);
+	b |= ((address & 0b1111111100000000) >> 8);
+	c |= (address & 0b0001100000000000);
+	c |= ((address & 0b0000000000000011) << 6);
+  d |= ((address & 0b0000000000100000) >> 3);
+	
+
+	GPIO_WriteOutputPort(GPIOA, a);
+	GPIO_WriteOutputPort(GPIOB, b);
+	GPIO_WriteOutputPort(GPIOC, c);
+	GPIO_WriteOutputPort(GPIOD, d);
+	
+	
+	
+	#endif
 }
 
 void nop_delay(int times) {
@@ -216,11 +270,12 @@ uint8_t read_byte(uint16_t address) {
 	set_address(address);
 	set_sig_read();
 
+
 	// wait 3 machin circle
 	
-	__ASM volatile("nop");
-	__ASM volatile("nop");
-	__ASM volatile("nop");
+	//__ASM volatile("nop");
+	//__ASM volatile("nop");
+	//__ASM volatile("nop");
 	
 	uint8_t bval = 0;
 	
@@ -247,7 +302,6 @@ uint16_t read_word(uint32_t address) {
   __ASM volatile("nop");
   uint16_t wval = 0;
 	uint16_t wval1 = 0;
-	char message[256];
 	
 	uint16_t a = GPIO_ReadInputPort(GPIOA);
 	uint16_t b = GPIO_ReadInputPort(GPIOB);
