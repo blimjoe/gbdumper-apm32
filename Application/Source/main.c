@@ -278,6 +278,10 @@ int getMode() {
 }
  
 int main(void) {
+	RCM_EnableAPB2PeriphClock((RCM_APB2_PERIPH_T)(RCM_APB2_PERIPH_GPIOA));
+	RCM_EnableAPB2PeriphClock((RCM_APB2_PERIPH_T)(RCM_APB2_PERIPH_GPIOB));
+	RCM_EnableAPB2PeriphClock((RCM_APB2_PERIPH_T)(RCM_APB2_PERIPH_GPIOC));
+	RCM_EnableAPB2PeriphClock((RCM_APB2_PERIPH_T)(RCM_APB2_PERIPH_GPIOD));
 	// for usb init
 	config_gpio_pb5();
 	GPIO_SetBit(GPIOB, GPIO_PIN_5);
@@ -287,8 +291,7 @@ int main(void) {
 	// config PB0 in for get switch info
 	// PB0 high = GBA Mode; PB0 low = GB/GBC Mode
 	GPIO_Config_T GPIO_ConfigStruct;
-	
-	RCM_EnableAPB2PeriphClock((RCM_APB2_PERIPH_T)(RCM_APB2_PERIPH_GPIOB));
+
 	GPIO_ConfigStruct.mode = GPIO_MODE_IN_PD;
   GPIO_ConfigStruct.pin = GPIO_PIN_0;
   GPIO_ConfigStruct.speed = GPIO_SPEED_50MHz;
