@@ -414,6 +414,11 @@
               <FileType>1</FileType>
               <FilePath>.\Application\Source\emuDump.c</FilePath>
             </File>
+            <File>
+              <FileName>function.s</FileName>
+              <FileType>2</FileType>
+              <FilePath>.\Application\Source\function.s</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
